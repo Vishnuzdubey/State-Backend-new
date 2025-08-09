@@ -10,12 +10,16 @@ import { Manufacturers } from '@/pages/super-admin/Manufacturers';
 import { ManufacturerDetails } from '@/pages/super-admin/ManufacturerDetails';
 import { AddManufacturer } from '@/pages/super-admin/AddManufacturer';
 import { Distributors } from '@/pages/super-admin/Distributors';
+import { DistributorDetails } from '@/pages/super-admin/DistributorDetails';
+import { AddDistributor } from '@/pages/super-admin/AddDistributor';
 import { RFCs } from '@/pages/super-admin/RFCs';
 import { RFCDetails } from '@/pages/super-admin/RFCDetails';
 import { AddRFC } from '@/pages/super-admin/AddRFC';
 import { Devices } from '@/pages/super-admin/Devices';
 import { DeviceInventory } from '@/pages/super-admin/device-inventory';
 import { Plans } from '@/pages/super-admin/Plans';
+import { PlanDetails } from '@/pages/super-admin/PlanDetails';
+import { AddPlan } from '@/pages/super-admin/AddPlan';
 import { Users } from '@/pages/super-admin/Users';
 import { Settings } from '@/pages/super-admin/Settings';
 
@@ -75,12 +79,16 @@ function AppRoutes() {
         <Route path="manufacturers/add" element={<AddManufacturer />} />
         <Route path="manufacturers/:id" element={<ManufacturerDetails />} />
         <Route path="distributors" element={<Distributors />} />
+        <Route path="distributors/add" element={<AddDistributor />} />
+        <Route path="distributors/:id" element={<DistributorDetails />} />
         <Route path="rfcs" element={<RFCs />} />
         <Route path="rfcs/add" element={<AddRFC />} />
         <Route path="rfcs/:id" element={<RFCDetails />} />
         <Route path="devices" element={<Devices />} />
         <Route path="device-inventory" element={<DeviceInventory />} />
         <Route path="plans" element={<Plans />} />
+        <Route path="plans/add" element={<AddPlan />} />
+        <Route path="plans/:id" element={<PlanDetails />} />
         <Route path="users" element={<Users />} />
         <Route path="settings" element={<Settings />} />
       </Route>
