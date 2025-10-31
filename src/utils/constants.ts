@@ -35,7 +35,11 @@ export const SIDEBAR_MENU = {
   ],
   'manufacturer': [
     { label: 'Dashboard', path: '/manufacturer', icon: 'LayoutDashboard' },
-    { label: 'Inventory', path: '/manufacturer/inventory', icon: 'Package' },
+  { label: 'Inventory', path: '/manufacturer/inventory', icon: 'Package' },
+  { label: 'RFC', path: '/manufacturer/rfcs', icon: 'Radio' },
+  { label: 'Distributors', path: '/manufacturer/distributors', icon: 'Truck' },
+  { label: 'Devices', path: '/manufacturer/devices', icon: 'Cpu' },
+  { label: 'User Management', path: '/manufacturer/users', icon: 'Users' },
     { label: 'Settings', path: '/manufacturer/settings', icon: 'Settings' }
   ],
   'distributor': [
@@ -49,3 +53,6 @@ export const SIDEBAR_MENU = {
     { label: 'Settings', path: '/rfc/settings', icon: 'Settings' }
   ]
 };
+
+
+

@@ -160,6 +160,14 @@ export function Login() {
                 </div>
                 <p className="text-center font-medium">Password: password</p>
               </div>
+              <div className="mt-4">
+                <Button
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => navigate('/register/manufacturer')}
+                >
+                  Register as Manufacturer
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

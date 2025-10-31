@@ -27,6 +27,13 @@ import { Settings } from '@/pages/super-admin/Settings';
 import { ManufacturerDashboard } from '@/pages/manufacturer/Dashboard';
 import { ManufacturerInventory } from '@/pages/manufacturer/Inventory';
 import { ManufacturerSettings } from '@/pages/manufacturer/Settings';
+import { Onboarding } from '@/pages/manufacturer/Onboarding';
+import ManufacturerRFCs from '@/pages/manufacturer/RFCs';
+import AddInventory from '@/pages/manufacturer/AddInventory';
+import ManufacturerDistributors from '@/pages/manufacturer/Distributors';
+import AddDevice from '@/pages/manufacturer/AddDevice';
+import ManufacturerDevices from '@/pages/manufacturer/Devices';
+import ManufacturerUsers from '@/pages/manufacturer/Users';
 
 // Distributor Pages
 import { DistributorDashboard } from '@/pages/distributor/Dashboard';
@@ -61,7 +68,9 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+  <Route path="/login" element={<Login />} />
+  {/* Public registration route for manufacturers (accessible without authentication) */}
+  <Route path="/register/manufacturer" element={<AddManufacturer />} />
       
       <Route path="/" element={<Navigate to={getRootRedirect()} replace />} />
       
@@ -103,7 +112,14 @@ function AppRoutes() {
         }
       >
         <Route index element={<ManufacturerDashboard />} />
-        <Route path="inventory" element={<ManufacturerInventory />} />
+  <Route path="onboarding" element={<Onboarding />} />
+  <Route path="rfcs" element={<ManufacturerRFCs />} />
+  <Route path="add-inventory" element={<AddInventory />} />
+  <Route path="add-device" element={<AddDevice />} />
+  <Route path="distributors" element={<ManufacturerDistributors />} />
+  <Route path="devices" element={<ManufacturerDevices />} />
+  <Route path="users" element={<ManufacturerUsers />} />
+    <Route path="inventory" element={<ManufacturerInventory />} />
         <Route path="settings" element={<ManufacturerSettings />} />
       </Route>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -39,7 +40,12 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const location = useLocation();
   
+  // Hide the main sidebar during manufacturer onboarding to provide a focused flow
+  if (location.pathname.startsWith('/manufacturer/onboarding')) {
+    return null;
+  }
   if (!user) return null;
 
   const menuItems = SIDEBAR_MENU[user.role] || [];
