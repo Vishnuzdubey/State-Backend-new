@@ -35,8 +35,8 @@ export function Login() {
 
   // Redirect if already authenticated
   if (isAuthenticated && user) {
-    const redirectPath = user.role === 'super-admin' 
-      ? '/super-admin' 
+    const redirectPath = user.role === 'super-admin'
+      ? '/super-admin'
       : `/${user.role}`;
     return <Navigate to={redirectPath} replace />;
   }
@@ -46,14 +46,14 @@ export function Login() {
     setError('');
 
     const success = await login(data.email, data.password);
-    
+
     if (success) {
-      // Navigation will happen via the useAuth hook
+      // Navigation will happen based on redirect logic
       navigate('/');
     } else {
       setError('Invalid email or password');
     }
-    
+
     setIsLoading(false);
   };
 
@@ -128,9 +128,9 @@ export function Login() {
                 )}
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign In'}
@@ -160,10 +160,13 @@ export function Login() {
                 </div>
                 <p className="text-center font-medium">Password: password</p>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600 mb-2">
+                  Don't have an account?
+                </p>
                 <Button
                   className="w-full bg-green-600 hover:bg-green-700"
-                  onClick={() => navigate('/register/manufacturer')}
+                  onClick={() => navigate('/register')}
                 >
                   Register as Manufacturer
                 </Button>

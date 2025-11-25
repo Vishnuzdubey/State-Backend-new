@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { 
-  Bell, 
-  ChevronDown, 
-  LogOut, 
-  Menu, 
-  Settings, 
-  User 
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
+  Settings,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -40,9 +40,13 @@ export function Header({ onMenuToggle }: HeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
+
           <div className="hidden sm:block">
-            <h1 className="text-xl font-semibold text-gray-900">RoadEye Device Management</h1>
+            <h1 className="text-xl font-semibold text-gray-900">
+              {user?.role === 'manufacturer' && user?.status !== 'APPROVED'
+                ? 'Manufacturer Onboarding'
+                : 'RoadEye Device Management'}
+            </h1>
           </div>
         </div>
 
@@ -51,7 +55,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             {notifications > 0 && (
-              <Badge 
+              <Badge
                 className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 variant="destructive"
               >
@@ -72,9 +76,16 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 </Avatar>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {user?.role?.replace('-', ' ')}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {user?.role?.replace('-', ' ')}
+                    </p>
+                    {user?.role === 'manufacturer' && user?.status && user.status !== 'APPROVED' && (
+                      <Badge variant="secondary" className="text-xs">
+                        {user.status}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
                 <ChevronDown className="h-4 w-4" />
               </Button>

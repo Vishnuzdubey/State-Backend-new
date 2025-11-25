@@ -1,4 +1,4 @@
-import { 
+import {
   Activity,
   Package,
   TrendingUp,
@@ -18,7 +18,7 @@ export function ManufacturerDashboard() {
   };
 
   return (
-    <div className="space-y-8 w-full">
+    <div className="space-y-8 w-full min-h-screen">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Manufacturer Dashboard
@@ -36,7 +36,7 @@ export function ManufacturerDashboard() {
           trend={{ value: 8, isPositive: true }}
           className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
         />
-        
+
         <StatsCard
           title="Inventory Uploaded"
           value={metrics.inventoryUploaded.toLocaleString()}
@@ -44,7 +44,7 @@ export function ManufacturerDashboard() {
           trend={{ value: 15, isPositive: true }}
           className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
         />
-        
+
         <StatsCard
           title="Activations (7 days)"
           value={metrics.activations7Days}
@@ -52,27 +52,25 @@ export function ManufacturerDashboard() {
           trend={{ value: 12, isPositive: true }}
           className="bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800"
         />
-        
+
         <StatsCard
           title="Expiring in 30 days"
           value={metrics.expiringIn30Days}
           icon={Clock}
-          className={`${
-            metrics.expiringIn30Days > 0 
-              ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' 
+          className={`${metrics.expiringIn30Days > 0
+              ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
               : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-          }`}
+            }`}
         />
-        
+
         <StatsCard
           title="Expired, not renewed"
           value={metrics.expiredNotRenewed}
           icon={AlertTriangle}
-          className={`${
-            metrics.expiredNotRenewed > 0 
-              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' 
+          className={`${metrics.expiredNotRenewed > 0
+              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
               : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-          }`}
+            }`}
         />
       </div>
 
@@ -98,21 +96,19 @@ export function ManufacturerDashboard() {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Devices Expiring Soon</span>
-              <span className={`font-semibold ${
-                metrics.expiringIn30Days > 0 
-                  ? 'text-yellow-600 dark:text-yellow-400' 
+              <span className={`font-semibold ${metrics.expiringIn30Days > 0
+                  ? 'text-yellow-600 dark:text-yellow-400'
                   : 'text-gray-500 dark:text-gray-400'
-              }`}>
+                }`}>
                 {metrics.expiringIn30Days}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Expired Devices</span>
-              <span className={`font-semibold ${
-                metrics.expiredNotRenewed > 0 
-                  ? 'text-red-600 dark:text-red-400' 
+              <span className={`font-semibold ${metrics.expiredNotRenewed > 0
+                  ? 'text-red-600 dark:text-red-400'
                   : 'text-gray-500 dark:text-gray-400'
-              }`}>
+                }`}>
                 {metrics.expiredNotRenewed}
               </span>
             </div>

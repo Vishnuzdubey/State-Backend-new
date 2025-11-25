@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
+import {
   ChevronLeft,
   LayoutDashboard,
   Factory,
@@ -41,27 +41,34 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  
+
   // Hide the main sidebar during manufacturer onboarding to provide a focused flow
   if (location.pathname.startsWith('/manufacturer/onboarding')) {
     return null;
   }
   if (!user) return null;
 
+  // For manufacturers, only show menu if approved
+  if (user.role === 'manufacturer' && user.status !== 'APPROVED') {
+    console.log('Manufacturer not approved, hiding sidebar. Status:', user.status);
+    return null;
+  }
+
   const menuItems = SIDEBAR_MENU[user.role] || [];
+  console.log('Rendering sidebar for:', user.role, 'Menu items:', menuItems.length);
 
   return (
     <>
       {/* Mobile backdrop */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
           onClick={onClose}
         />
       )}
-      
+
       {/* Sidebar */}
-      <aside 
+      <aside
         className={cn(
           "fixed top-0 left-0 z-50 h-screen bg-white border-r border-gray-200 transition-all duration-300 shadow-lg",
           "lg:relative lg:translate-x-0 lg:shadow-none",
@@ -104,8 +111,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       cn(
                         "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                         "hover:bg-gray-100",
-                        isActive 
-                          ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700" 
+                        isActive
+                          ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
                           : "text-gray-600",
                         collapsed && "justify-center px-2"
                       )

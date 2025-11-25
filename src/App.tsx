@@ -1,8 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { ManufacturerStatusGuard } from '@/components/ManufacturerStatusGuard';
 import { Layout } from '@/components/layout/Layout';
 import { Login } from '@/pages/auth/Login';
+import { Register } from '@/pages/auth/Register';
 
 // Super Admin Pages
 import { SuperAdminDashboard } from '@/pages/super-admin/Dashboard';
@@ -35,6 +37,7 @@ import AddDevice from '@/pages/manufacturer/AddDevice';
 import ManufacturerDevices from '@/pages/manufacturer/Devices';
 import ManufacturerUsers from '@/pages/manufacturer/Users';
 
+
 // Distributor Pages
 import { DistributorDashboard } from '@/pages/distributor/Dashboard';
 import { DistributorInventory } from '@/pages/distributor/Inventory';
@@ -48,15 +51,21 @@ import { RFCSettings } from '@/pages/rfc/Settings';
 function AppRoutes() {
   const { user, isAuthenticated } = useAuth();
 
-  // Root redirect based on user role
+  // Root redirect based on user role and status
   const getRootRedirect = () => {
     if (!isAuthenticated || !user) return '/login';
-    
+
     switch (user.role) {
       case 'super-admin':
         return '/super-admin';
       case 'manufacturer':
-        return '/manufacturer';
+        // Check manufacturer status for proper routing
+        if (user.status === 'APPROVED') {
+          return '/manufacturer';
+        } else {
+          // ACKNOWLEDGED, PENDING, or any other status goes to onboarding
+          return '/manufacturer/onboarding';
+        }
       case 'distributor':
         return '/distributor';
       case 'rfc':
@@ -68,15 +77,14 @@ function AppRoutes() {
 
   return (
     <Routes>
-  <Route path="/login" element={<Login />} />
-  {/* Public registration route for manufacturers (accessible without authentication) */}
-  <Route path="/register/manufacturer" element={<AddManufacturer />} />
-      
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
       <Route path="/" element={<Navigate to={getRootRedirect()} replace />} />
-      
+
       {/* Super Admin Routes */}
-      <Route 
-        path="/super-admin/*" 
+      <Route
+        path="/super-admin/*"
         element={
           <ProtectedRoute allowedRoles={['super-admin']}>
             <Layout />
@@ -102,30 +110,45 @@ function AppRoutes() {
         <Route path="settings" element={<Settings />} />
       </Route>
 
-      {/* Manufacturer Routes */}
-      <Route 
-        path="/manufacturer/*" 
+      {/* Manufacturer Routes - Onboarding (for non-approved) */}
+      <Route
+        path="/manufacturer/onboarding"
         element={
           <ProtectedRoute allowedRoles={['manufacturer']}>
-            <Layout />
+            <ManufacturerStatusGuard requireApproved={false}>
+              <Layout />
+            </ManufacturerStatusGuard>
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Onboarding />} />
+      </Route>
+
+      {/* Manufacturer Routes - Dashboard (for approved only) */}
+      <Route
+        path="/manufacturer/*"
+        element={
+          <ProtectedRoute allowedRoles={['manufacturer']}>
+            <ManufacturerStatusGuard requireApproved={true}>
+              <Layout />
+            </ManufacturerStatusGuard>
           </ProtectedRoute>
         }
       >
         <Route index element={<ManufacturerDashboard />} />
-  <Route path="onboarding" element={<Onboarding />} />
-  <Route path="rfcs" element={<ManufacturerRFCs />} />
-  <Route path="add-inventory" element={<AddInventory />} />
-  <Route path="add-device" element={<AddDevice />} />
-  <Route path="distributors" element={<ManufacturerDistributors />} />
-  <Route path="devices" element={<ManufacturerDevices />} />
-  <Route path="users" element={<ManufacturerUsers />} />
-    <Route path="inventory" element={<ManufacturerInventory />} />
+        <Route path="rfcs" element={<ManufacturerRFCs />} />
+        <Route path="add-inventory" element={<AddInventory />} />
+        <Route path="add-device" element={<AddDevice />} />
+        <Route path="distributors" element={<ManufacturerDistributors />} />
+        <Route path="devices" element={<ManufacturerDevices />} />
+        <Route path="users" element={<ManufacturerUsers />} />
+        <Route path="inventory" element={<ManufacturerInventory />} />
         <Route path="settings" element={<ManufacturerSettings />} />
       </Route>
 
       {/* Distributor Routes */}
-      <Route 
-        path="/distributor/*" 
+      <Route
+        path="/distributor/*"
         element={
           <ProtectedRoute allowedRoles={['distributor']}>
             <Layout />
@@ -138,8 +161,8 @@ function AppRoutes() {
       </Route>
 
       {/* RFC Routes */}
-      <Route 
-        path="/rfc/*" 
+      <Route
+        path="/rfc/*"
         element={
           <ProtectedRoute allowedRoles={['rfc']}>
             <Layout />
