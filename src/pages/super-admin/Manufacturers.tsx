@@ -1,94 +1,69 @@
-import { useState } from 'react';
-import { Plus, Download, FileText, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Download, FileText, Search, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/common/DataTable';
-import { Manufacturer } from '@/types';
 import { useNavigate } from 'react-router-dom';
+import { superAdminApi, type ManufacturerData } from '@/api';
 
 export function Manufacturers() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const [manufacturers] = useState<Manufacturer[]>([
-    {
-      id: '1',
-      entityName: 'Watsoo Express Private Limited',
-      code: 'WATS8196',
-      district: 'Gurgaon',
-      pinCode: '122016',
-      status: 'active',
-      email: 'vltd@watsoo.com',
-      phone: '8448835133',
-      address: 'Plot No. 872, Udyog Vihar, Phase-V',
-      remainingPoints: 99562,
-    },
-    {
-      id: '2',
-      entityName: 'Ecogas Impex Pvt Ltd',
-      code: 'ECOG5365',
-      district: 'Faridabad',
-      pinCode: '121003',
-      status: 'active',
-      email: 'info@ecogas.com',
-      phone: '9876543210',
-      address: 'Industrial Area, Sector 25',
-      remainingPoints: 96220,
-    },
-    {
-      id: '3',
-      entityName: 'RDM ENTERPRISES PRIVATE LIMITED',
-      code: 'RDM 8367',
-      district: 'Faridabad',
-      pinCode: '121102',
-      status: 'active',
-      email: 'contact@rdm.com',
-      phone: '9876543211',
-      address: 'Plot 45, Industrial Complex',
-      remainingPoints: 93700,
-    },
-    {
-      id: '4',
-      entityName: 'ACUTE COMMUNICATION SERVICES PVT LTD',
-      code: 'ACUT4287',
-      district: 'North East Delhi',
-      pinCode: '110053',
-      status: 'active',
-      email: 'info@acute.com',
-      phone: '9876543212',
-      address: 'Block A, Commercial Complex',
-      remainingPoints: 98263,
-    },
-    {
-      id: '5',
-      entityName: 'TechFlow Solutions Ltd',
-      code: 'TECH7891',
-      district: 'Bangalore',
-      pinCode: '560100',
-      status: 'active',
-      email: 'admin@techflow.com',
-      phone: '9876543213',
-      address: 'Electronic City, Phase 2',
-      remainingPoints: 85420,
-    },
-  ]);
+  const [manufacturers, setManufacturers] = useState<ManufacturerData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const totalCount = 19;
+  useEffect(() => {
+    fetchManufacturers();
+  }, []);
+
+  const fetchManufacturers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await superAdminApi.getManufacturers();
+      setManufacturers(response.data);
+      console.log('📋 Loaded', response.data.length, 'manufacturers');
+    } catch (error) {
+      console.error('Failed to fetch manufacturers:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const hasAllDocuments = (manufacturer: ManufacturerData) => {
+    return !!(
+      manufacturer.gst_doc &&
+      manufacturer.balance_sheet_doc &&
+      manufacturer.address_proof_doc &&
+      manufacturer.pan_doc &&
+      manufacturer.user_pan_doc &&
+      manufacturer.user_address_proof_doc
+    );
+  };
+
+  const getDocumentStatus = (manufacturer: ManufacturerData) => {
+    if (hasAllDocuments(manufacturer)) {
+      return { label: 'Uploaded', variant: 'success' };
+    }
+    return { label: 'Pending', variant: 'warning' };
+  };
+
+  const totalCount = manufacturers.length;
 
   const filteredManufacturers = manufacturers.filter(manufacturer =>
-    manufacturer.entityName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manufacturer.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manufacturer.district.toLowerCase().includes(searchTerm.toLowerCase())
+    manufacturer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    manufacturer.gst.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    manufacturer.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    manufacturer.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const columns = [
-    { 
-      key: 'entityName', 
-      header: 'Entity Name', 
+    {
+      key: 'name',
+      header: 'Entity Name',
       sortable: true,
-      render: (value: string, row: Manufacturer) => (
+      render: (value: string, row: ManufacturerData) => (
         <button
           onClick={() => navigate(`/super-admin/manufacturers/${row.id}`)}
           className="text-blue-600 hover:text-blue-800 hover:underline font-medium text-left"
@@ -97,40 +72,58 @@ export function Manufacturers() {
         </button>
       )
     },
-    { key: 'code', header: 'Entity Code', sortable: true },
+    { key: 'gst', header: 'GST Number', sortable: true },
     { key: 'district', header: 'District', sortable: true },
-    { key: 'pinCode', header: 'Pin Code' },
-    { 
-      key: 'status', 
-      header: 'Status',
-      render: (value: string) => (
-        <Badge variant="secondary" className="bg-green-100 text-green-800">
-          Uploaded
-        </Badge>
-      )
+    { key: 'pincode', header: 'Pin Code' },
+    { key: 'email', header: 'Email', sortable: true },
+    { key: 'phone', header: 'Phone' },
+    {
+      key: 'status',
+      header: 'Approval Status',
+      render: (value: string) => {
+        const statusColors = {
+          PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+          ACKNOWLEDGED: 'bg-blue-100 text-blue-800 border-blue-300',
+          APPROVED: 'bg-green-100 text-green-800 border-green-300',
+        };
+        return (
+          <Badge variant="outline" className={statusColors[value as keyof typeof statusColors]}>
+            {value}
+          </Badge>
+        );
+      }
     },
     {
-      key: 'remainingPoints',
-      header: 'Remaining Points',
-      render: (value: number) => (
-        <span className="font-medium">{value?.toLocaleString() || 0}</span>
-      )
-    },
-    {
-      key: 'addPoints',
-      header: 'Add Points',
-      render: () => (
-        <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">
-          Add
-        </Button>
-      )
+      key: 'documents',
+      header: 'Documents',
+      render: (_: any, row: ManufacturerData) => {
+        const docStatus = getDocumentStatus(row);
+        return (
+          <Badge
+            variant="outline"
+            className={
+              docStatus.variant === 'success'
+                ? 'bg-green-100 text-green-800 border-green-300'
+                : 'bg-orange-100 text-orange-800 border-orange-300'
+            }
+          >
+            {docStatus.label}
+          </Badge>
+        );
+      }
     }
   ];
 
   const actions = [
-    { label: 'Edit', onClick: (row: Manufacturer) => console.log('Edit', row) },
-    { label: 'View Details', onClick: (row: Manufacturer) => navigate(`/super-admin/manufacturers/${row.id}`) },
-    { label: 'Deactivate', onClick: (row: Manufacturer) => console.log('Deactivate', row), variant: 'destructive' as const },
+    { label: 'View Details', onClick: (row: ManufacturerData) => navigate(`/super-admin/manufacturers/${row.id}`) },
+    {
+      label: 'Acknowledge',
+      onClick: (row: ManufacturerData) => {
+        if (row.status === 'PENDING') {
+          navigate(`/super-admin/manufacturers/${row.id}`, { state: { action: 'acknowledge' } });
+        }
+      }
+    },
   ];
 
   const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
@@ -146,42 +139,67 @@ export function Manufacturers() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Manufacturers List</h1>
           <p className="text-gray-600 text-lg">Manage manufacturer accounts and approvals</p>
         </div>
-        <Button 
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => navigate('/super-admin/manufacturers/add')}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Manufacturer
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={fetchManufacturers}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => navigate('/super-admin/manufacturers/add')}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Manufacturer
+          </Button>
+        </div>
       </div>
 
       {/* Summary and Export */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="text-lg font-semibold">
-            Total Count: <span className="text-blue-600">{totalCount}</span>
+            Total: <span className="text-blue-600">{totalCount}</span>
+          </div>
+          <div className="text-sm">
+            <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+              Pending: {manufacturers.filter(m => m.status === 'PENDING').length}
+            </Badge>
+          </div>
+          <div className="text-sm">
+            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
+              Acknowledged: {manufacturers.filter(m => m.status === 'ACKNOWLEDGED').length}
+            </Badge>
+          </div>
+          <div className="text-sm">
+            <Badge className="bg-green-100 text-green-800 border-green-300">
+              Approved: {manufacturers.filter(m => m.status === 'APPROVED').length}
+            </Badge>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleExport('csv')}
           >
             <FileText className="h-4 w-4 mr-2" />
             CSV
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleExport('excel')}
           >
             <Download className="h-4 w-4 mr-2" />
             Excel
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => handleExport('pdf')}
           >

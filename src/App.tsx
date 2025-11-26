@@ -18,6 +18,8 @@ import { RFCs } from '@/pages/super-admin/RFCs';
 import { RFCDetails } from '@/pages/super-admin/RFCDetails';
 import { AddRFC } from '@/pages/super-admin/AddRFC';
 import { Devices } from '@/pages/super-admin/Devices';
+import { DeviceDetails } from '@/pages/super-admin/DeviceDetails';
+import { DeviceLiveMap } from '@/pages/super-admin/DeviceLiveMap';
 import { DeviceInventory } from '@/pages/super-admin/device-inventory';
 import { Plans } from '@/pages/super-admin/Plans';
 import { PlanDetails } from '@/pages/super-admin/PlanDetails';
@@ -102,6 +104,8 @@ function AppRoutes() {
         <Route path="rfcs/add" element={<AddRFC />} />
         <Route path="rfcs/:id" element={<RFCDetails />} />
         <Route path="devices" element={<Devices />} />
+        <Route path="devices/map" element={<DeviceLiveMap />} />
+        <Route path="devices/:imei" element={<DeviceDetails />} />
         <Route path="device-inventory" element={<DeviceInventory />} />
         <Route path="plans" element={<Plans />} />
         <Route path="plans/add" element={<AddPlan />} />

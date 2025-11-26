@@ -1,4 +1,6 @@
-import { 
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
   Activity,
   Package,
   TrendingUp,
@@ -10,8 +12,13 @@ import {
 import { StatsCard } from '@/components/common/StatsCard';
 import { MapComponent } from '@/components/common/MapComponent';
 import { DataTable, StatusBadge } from '@/components/common/DataTable';
+import { superAdminApi, type ManufacturerData } from '@/api';
 
 export function SuperAdminDashboard() {
+  const navigate = useNavigate();
+  const [manufacturers, setManufacturers] = useState<ManufacturerData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   // Mock data
   const metrics = {
     activeDevices: 15420,
@@ -19,30 +26,58 @@ export function SuperAdminDashboard() {
     activations: 1240,
     devicesExpiring: 89,
     expiredDevices: 23,
-    pendingApprovals: 12
+    pendingApprovals: 0
   };
 
-  const pendingApprovals = [
-    { id: 1, entityName: 'TechCorp Manufacturing', type: 'Manufacturer', district: 'Mumbai', status: 'pending' },
-    { id: 2, entityName: 'Global Distributors Ltd', type: 'Distributor', district: 'Delhi', status: 'pending' },
-    { id: 3, entityName: 'Smart RFC Solutions', type: 'RFC', district: 'Bangalore', status: 'pending' },
-  ];
+  useEffect(() => {
+    fetchManufacturers();
+  }, []);
+
+  const fetchManufacturers = async () => {
+    try {
+      const response = await superAdminApi.getManufacturers();
+      setManufacturers(response.data);
+      console.log('📊 Dashboard loaded with', response.data.length, 'manufacturers');
+    } catch (error) {
+      console.error('Failed to fetch manufacturers:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const pendingManufacturers = manufacturers.filter(m => m.status === 'PENDING');
+  const pendingApprovals = pendingManufacturers.map(m => ({
+    id: m.id,
+    entityName: m.name,
+    type: 'Manufacturer',
+    district: m.district,
+    status: m.status.toLowerCase(),
+    email: m.email,
+    phone: m.phone,
+  }));
+
+  metrics.pendingApprovals = pendingApprovals.length;
 
   const approvalColumns = [
     { key: 'entityName', header: 'Entity Name' },
     { key: 'type', header: 'Type' },
     { key: 'district', header: 'District' },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       header: 'Status',
       render: (value: string) => <StatusBadge status={value} />
     }
   ];
 
   const approvalActions = [
-    { label: 'Approve', onClick: (row: any) => console.log('Approve', row) },
-    { label: 'Reject', onClick: (row: any) => console.log('Reject', row), variant: 'destructive' as const },
-    { label: 'View Details', onClick: (row: any) => console.log('View', row) }
+    {
+      label: 'View Details',
+      onClick: (row: any) => navigate(`/super-admin/manufacturers/${row.id}`)
+    },
+    {
+      label: 'Open Manufacturers',
+      onClick: () => navigate('/super-admin/manufacturers')
+    }
   ];
 
   return (
@@ -98,7 +133,7 @@ export function SuperAdminDashboard() {
       {/* Map and Approvals */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <MapComponent />
-        
+
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold text-gray-900">Pending Approvals</h2>
           <DataTable

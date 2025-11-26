@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthState } from '@/types';
-import { manufacturerApi } from '@/api';
+import { manufacturerApi, superAdminApi, distributorApi, rfcApi } from '@/api';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
@@ -8,39 +8,6 @@ interface AuthContextType extends AuthState {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Mock users for development (shown in login form only)
-const MOCK_USERS: User[] = [
-  {
-    id: '1',
-    email: 'superadmin@RoadEye.com',
-    name: 'Super Admin',
-    role: 'super-admin',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=SuperAdmin'
-  },
-  {
-    id: '2',
-    email: 'manufacturer@RoadEye.com',
-    name: 'Manufacturer User',
-    role: 'manufacturer',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Manufacturer',
-    status: 'APPROVED' // For demo purposes
-  },
-  {
-    id: '3',
-    email: 'distributor@RoadEye.com',
-    name: 'Distributor User',
-    role: 'distributor',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Distributor'
-  },
-  {
-    id: '4',
-    email: 'rfc@RoadEye.com',
-    name: 'RFC User',
-    role: 'rfc',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=RFC'
-  }
-];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
@@ -74,11 +41,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    console.log('🔐 Starting login attempt for:', email);
+
+    // Try Super Admin login first
     try {
+      console.log('🔍 Trying Super Admin login...');
+      const response = await superAdminApi.login({ email, password });
+
+      if (response.status === 'success' && response.user) {
+        const user: User = {
+          id: response.user.id,
+          email: response.user.email,
+          name: response.user.fullname,
+          role: 'super-admin',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=SuperAdmin'
+        };
+
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        localStorage.setItem('user_role', 'super-admin');
+        setAuthState({
+          user,
+          isAuthenticated: true,
+          isLoading: false
+        });
+        console.log('✅ Super Admin login successful');
+        return true;
+      }
+    } catch (error) {
+      console.log('❌ Super Admin login failed, trying next...');
+    }
+
+    // Try Manufacturer login
+    try {
+      console.log('🔍 Trying Manufacturer login...');
       const response = await manufacturerApi.login({ email, password });
 
       if (response.status === 'success' && response.user) {
-        // Store complete user data from API
         const user: User = {
           id: response.user.id,
           email: response.user.email,
@@ -104,24 +102,100 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
 
         localStorage.setItem('auth_user', JSON.stringify(user));
+        localStorage.setItem('user_role', 'manufacturer');
         setAuthState({
           user,
           isAuthenticated: true,
           isLoading: false
         });
+        console.log('✅ Manufacturer login successful');
         return true;
       }
-
-      return false;
     } catch (error) {
-      console.error('Login error:', error);
-      return false;
+      console.log('❌ Manufacturer login failed, trying next...');
     }
+
+    // Try Distributor login
+    try {
+      console.log('🔍 Trying Distributor login...');
+      const response = await distributorApi.login({ email, password });
+
+      if (response.status === 'success' && response.user) {
+        const user: User = {
+          id: response.user.id,
+          email: response.user.email,
+          name: response.user.name || response.user.fullname || 'Distributor User',
+          role: 'distributor',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Distributor'
+        };
+
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        localStorage.setItem('user_role', 'distributor');
+        setAuthState({
+          user,
+          isAuthenticated: true,
+          isLoading: false
+        });
+        console.log('✅ Distributor login successful');
+        return true;
+      }
+    } catch (error) {
+      console.log('❌ Distributor login failed, trying next...');
+    }
+
+    // Try RFC login
+    try {
+      console.log('🔍 Trying RFC login...');
+      const response = await rfcApi.login({ email, password });
+
+      if (response.status === 'success' && response.user) {
+        const user: User = {
+          id: response.user.id,
+          email: response.user.email,
+          name: response.user.name || response.user.fullname || 'RFC User',
+          role: 'rfc',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=RFC'
+        };
+
+        localStorage.setItem('auth_user', JSON.stringify(user));
+        localStorage.setItem('user_role', 'rfc');
+        setAuthState({
+          user,
+          isAuthenticated: true,
+          isLoading: false
+        });
+        console.log('✅ RFC login successful');
+        return true;
+      }
+    } catch (error) {
+      console.log('❌ RFC login failed');
+    }
+
+    console.error('❌ All login attempts failed');
+    return false;
   };
 
   const logout = () => {
-    manufacturerApi.logout();
+    const userRole = localStorage.getItem('user_role');
+
+    // Clear tokens based on role
+    switch (userRole) {
+      case 'super-admin':
+        superAdminApi.logout();
+        break;
+      case 'manufacturer':
+        manufacturerApi.logout();
+        break;
+      case 'distributor':
+        distributorApi.logout();
+        break;
+      case 'rfc':
+        rfcApi.logout();
+        break;
+    }
+
     localStorage.removeItem('auth_user');
+    localStorage.removeItem('user_role');
     setAuthState({
       user: null,
       isAuthenticated: false,
