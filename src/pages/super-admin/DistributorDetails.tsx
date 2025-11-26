@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import { ArrowLeft, Users, Smartphone, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,8 +72,7 @@ export function DistributorDetails() {
   ];
 
   // Mock device details (empty for now)
-  const deviceDetails = [];
-
+ 
   const userColumns = [
     { 
       key: 'fullName', 
@@ -113,7 +112,7 @@ export function DistributorDetails() {
     {
       key: 'editable',
       header: 'Action',
-      render: (value: boolean, row: any) => (
+      render: (value: boolean) => (
         value ? (
           <Button size="sm" variant="outline">
             Edit

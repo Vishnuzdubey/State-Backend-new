@@ -20,10 +20,10 @@ export function Devices() {
   const [devices, setDevices] = useState<DeviceData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [pageSize] = useState(100);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [, setIsDeleting] = useState(false);
   const [newDevice, setNewDevice] = useState({
     imei: '',
     serial_number: '',
