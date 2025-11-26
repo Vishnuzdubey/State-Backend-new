@@ -14,6 +14,9 @@ export interface InventoryDevice {
 }
 
 export interface InventoryItem extends InventoryDevice {
+  manufacturer_inventory_id: string | null | undefined;
+  certificate: any;
+  providers: any;
   id: string;
   manufacturer: string | null;
   distributor: string | null;
@@ -21,9 +24,9 @@ export interface InventoryItem extends InventoryDevice {
   manufacturer_entity_id: string;
 }
 
-interface BulkUploadRequest {
-  devices: InventoryDevice[];
-}
+// interface BulkUploadRequest {
+//   devices: InventoryDevice[];
+// }
 
 interface BulkUploadResponse {
   status: string;

@@ -432,7 +432,7 @@ export function ManufacturerDetails() {
                     variant="outline"
                     size="sm"
                     className="w-full mt-3"
-                    onClick={() => window.open(doc.url, '_blank')}
+                    onClick={() => window.open(doc.url!, '_blank')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Document

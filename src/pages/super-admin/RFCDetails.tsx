@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, Edit, Eye, Users, Smartphone } from 'lucide-react';
+
+import { ArrowLeft, Edit, Users, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,7 +35,7 @@ export function RFCDetails() {
   ];
 
   // Mock device details (empty for now)
-  const deviceDetails = [];
+  const deviceDetails: string | any[] = [];
 
   const userColumns = [
     { 

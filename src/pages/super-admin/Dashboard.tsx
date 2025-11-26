@@ -6,7 +6,6 @@ import {
   TrendingUp,
   Clock,
   XCircle,
-  MapPin,
   CheckCircle
 } from 'lucide-react';
 import { StatsCard } from '@/components/common/StatsCard';
@@ -17,7 +16,7 @@ import { superAdminApi, type ManufacturerData } from '@/api';
 export function SuperAdminDashboard() {
   const navigate = useNavigate();
   const [manufacturers, setManufacturers] = useState<ManufacturerData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [, setIsLoading] = useState(true);
 
   // Mock data
   const metrics = {

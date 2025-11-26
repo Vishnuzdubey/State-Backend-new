@@ -3,13 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   Smartphone,
-  MapPin,
+
   Calendar,
   Wifi,
-  Shield,
+
   User,
   Car,
-  Package,
   Info,
   Eye,
   Printer

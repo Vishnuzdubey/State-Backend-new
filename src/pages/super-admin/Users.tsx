@@ -3,7 +3,7 @@ import { Plus, Edit, Trash2, User as UserIcon, Mail, Phone, MapPin } from 'lucid
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/common/DataTable';
 import {
@@ -160,7 +160,7 @@ export function Users() {
     {
       key: 'first_name',
       header: 'Name',
-      render: (value: string, row: UserData) => (
+      render: ( row: UserData) => (
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
             <UserIcon className="h-4 w-4 text-blue-600" />
@@ -197,7 +197,7 @@ export function Users() {
     {
       key: 'address',
       header: 'Location',
-      render: (value: string, row: UserData) => (
+      render: (row: UserData) => (
         <div className="flex items-center gap-1 text-sm">
           <MapPin className="h-3 w-3 text-gray-400" />
           <span className="truncate max-w-[200px]">{row.district}, {row.state}</span>
