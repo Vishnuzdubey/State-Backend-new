@@ -42,6 +42,27 @@ interface GetInventoryResponse {
   data: InventoryItem[];
 }
 
+export interface ManufacturerDistributor {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface GetDistributorsResponse {
+  distributors: ManufacturerDistributor[];
+}
+
+export interface AssignToDistributorRequest {
+  distributorId: string;
+  imeis: string[];
+}
+
+export interface AssignToDistributorResponse {
+  status: string;
+  message: string;
+}
+
 interface LoginRequest {
   email: string;
   password: string;
@@ -195,5 +216,75 @@ export const manufacturerApi = {
     }
 
     return await response.json();
+  },
+
+  // Distributor Management
+  getDistributors: async (): Promise<GetDistributorsResponse> => {
+    const token = tokenManager.getToken('MANUFACTURER');
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
+    console.log('📦 Fetching distributors...');
+    const response = await fetch(`${API_BASE_URL}/manufacturer/distributors`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to fetch distributors' }));
+      throw new Error(error.message || `HTTP Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Distributors fetched:', data.distributors.length);
+    return data;
+  },
+
+  assignToDistributor: async (assignmentData: AssignToDistributorRequest): Promise<AssignToDistributorResponse> => {
+    const token = tokenManager.getToken('MANUFACTURER');
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
+    console.log('🔗 Assigning devices to distributor...');
+    console.log('📤 Request URL:', `${API_BASE_URL}/manufacturer/distributors/assign`);
+    console.log('📤 Request data:', assignmentData);
+    console.log('🔑 Token:', token);
+    
+    const response = await fetch(`${API_BASE_URL}/manufacturer/distributors/assign`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(assignmentData),
+    });
+
+    console.log('📥 Response status:', response.status);
+    console.log('📥 Response statusText:', response.statusText);
+    console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+
+    const contentType = response.headers.get('content-type');
+    console.log('📥 Content-Type:', contentType);
+
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('❌ Non-JSON response received:');
+      console.error('First 500 chars:', text.substring(0, 500));
+      throw new Error(`Server returned HTML instead of JSON (Status: ${response.status}). Endpoint may not exist or authentication failed.`);
+    }
+
+    const data = await response.json();
+    console.log('📥 Response data:', data);
+
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP Error: ${response.status}`);
+    }
+
+    console.log('✅ Devices assigned successfully');
+    return data;
   },
 };

@@ -1,147 +1,386 @@
-import React, { useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-
-type Distributor = {
-  id: number;
-  name: string;
-  code: string;
-  address: string;
-  district: string;
-  pincode: string;
-};
-
-const SAMPLE: Distributor[] = [
-  { id: 1, name: 'R K Enterprises', code: 'RKE', address: 'B-704, Balaji Complex, Plot 12 & 13, Sector 8E, Kalamboli, Navi Mumbai', district: 'Raigad', pincode: '410218' }
-];
+import { Badge } from '@/components/ui/badge';
+import { DataTable } from '@/components/common/DataTable';
+import { Send, Mail, Calendar, Package, CheckCircle2, X } from 'lucide-react';
+import { manufacturerApi, type ManufacturerDistributor, type InventoryItem } from '@/api/manufacturer';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function ManufacturerDistributors() {
-  const [query, setQuery] = useState('');
-  const [perPage] = useState(10);
-  const [page, setPage] = useState(1);
+  const [distributors, setDistributors] = useState<ManufacturerDistributor[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
+  const [selectedDistributor, setSelectedDistributor] = useState('');
+  const [isAssigning, setIsAssigning] = useState(false);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return SAMPLE;
-    return SAMPLE.filter(d => d.name.toLowerCase().includes(q) || d.code.toLowerCase().includes(q) || d.district.toLowerCase().includes(q));
-  }, [query]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const paged = useMemo(() => {
-    const start = (page - 1) * perPage;
-    return filtered.slice(start, start + perPage);
-  }, [filtered, page, perPage]);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const downloadCSV = (rows: Distributor[]) => {
-    const headers = ['Entity Name','Entity Code','Address','District','Pin Code'];
-    const body = rows.map(r => [r.name, r.code, r.address, r.district, r.pincode]);
-    const csv = [headers, ...body].map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'distributors.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+      const [distributorsResponse, inventoryResponse] = await Promise.all([
+        manufacturerApi.getDistributors(),
+        manufacturerApi.getInventory(),
+      ]);
+
+      setDistributors(distributorsResponse.distributors);
+      setInventory(inventoryResponse.data);
+    } catch (err) {
+      console.error('Failed to fetch data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const downloadExcel = (rows: Distributor[]) => {
-    const headers = ['Entity Name','Entity Code','Address','District','Pin Code'];
-    const body = rows.map(r => [r.name, r.code, r.address, r.district, r.pincode]);
-    const csv = [headers, ...body].map(r => r.join('\t')).join('\n');
-    const blob = new Blob([csv], { type: 'application/vnd.ms-excel' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'distributors.xls';
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleAssignToDistributor = async () => {
+    if (!selectedDistributor || selectedDevices.length === 0) {
+      alert('Please select distributor and at least one device');
+      return;
+    }
+
+    setIsAssigning(true);
+
+    try {
+      console.log('Starting distributor assignment...');
+      console.log('Distributor ID:', selectedDistributor);
+      console.log('IMEIs:', selectedDevices);
+      
+      await manufacturerApi.assignToDistributor({
+        distributorId: selectedDistributor,
+        imeis: selectedDevices,
+      });
+
+      alert(`Successfully assigned ${selectedDevices.length} device(s) to distributor`);
+      setIsAssignDialogOpen(false);
+      setSelectedDevices([]);
+      setSelectedDistributor('');
+      fetchData();
+    } catch (err) {
+      console.error('❌ Failed to assign devices:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        error: err,
+      });
+      
+      const errorMessage = err instanceof Error ? err.message : 'Failed to assign devices';
+      alert(`Assignment failed: ${errorMessage}`);
+    } finally {
+      setIsAssigning(false);
+    }
   };
 
-  const printPDF = (rows: Distributor[]) => {
-    const win = window.open('', '_blank');
-    if (!win) return;
-    const tableHtml = `
-      <html>
-        <head>
-          <title>Distributors</title>
-          <style>table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px}</style>
-        </head>
-        <body>
-          <h1>Distributors</h1>
-          <table>
-            <thead>
-              <tr>${['Entity Name','Entity Code','Address','District','Pin Code'].map(h=>`<th>${h}</th>`).join('')}</tr>
-            </thead>
-            <tbody>
-              ${rows.map(r => `<tr><td>${r.name}</td><td>${r.code}</td><td>${r.address}</td><td>${r.district}</td><td>${r.pincode}</td></tr>`).join('')}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `;
-    win.document.write(tableHtml);
-    win.document.close();
-    win.print();
+  const handleOpenAssignDialog = () => {
+    if (selectedDevices.length === 0) {
+      alert('Please select at least one device from inventory');
+      return;
+    }
+    setIsAssignDialogOpen(true);
   };
+
+  const handleToggleDevice = (imei: string) => {
+    setSelectedDevices(prev =>
+      prev.includes(imei)
+        ? prev.filter(i => i !== imei)
+        : [...prev, imei]
+    );
+  };
+
+  const handleToggleAll = () => {
+    if (selectedDevices.length === inventory.length) {
+      setSelectedDevices([]);
+    } else {
+      setSelectedDevices(inventory.map(d => d.imei));
+    }
+  };
+
+  const distributorColumns = [
+    {
+      key: 'name',
+      header: 'Name',
+      render: (value: string) => (
+        <span className="font-medium">{value || 'N/A'}</span>
+      ),
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (value: string) => (
+        <div className="flex items-center gap-2">
+          <Mail className="h-4 w-4 text-gray-400" />
+          <span className="text-sm">{value}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'createdAt',
+      header: 'Created',
+      render: (value: string) => (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-400" />
+          <span className="text-sm text-gray-500">
+            {new Date(value).toLocaleDateString()}
+          </span>
+        </div>
+      ),
+    },
+  ];
+
+  const inventoryColumns = [
+    {
+      key: 'select',
+      header: '',
+      render: (_value: any, row: InventoryItem) => (
+        <Checkbox
+          checked={selectedDevices.includes(row.imei)}
+          onCheckedChange={() => handleToggleDevice(row.imei)}
+        />
+      ),
+    },
+    {
+      key: 'imei',
+      header: 'IMEI',
+      render: (value: string) => (
+        <span className="font-mono text-sm font-medium">{value}</span>
+      ),
+    },
+    {
+      key: 'serial_number',
+      header: 'Serial Number',
+      render: (value: string) => (
+        <span className="font-mono text-sm">{value}</span>
+      ),
+    },
+    {
+      key: 'VLTD_model_code',
+      header: 'Model',
+      render: (value: string) => (
+        <Badge variant="outline">{value}</Badge>
+      ),
+    },
+    {
+      key: 'certificate_number',
+      header: 'Certificate',
+      render: (value: string) => (
+        <span className="text-sm font-mono">{value}</span>
+      ),
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading distributors...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Distributors</h1>
-        <div className="text-sm text-gray-600">Total Count: {filtered.length}</div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Distributors</h1>
+          <p className="text-gray-600">
+            Manage distributors and assign inventory ({distributors.length} distributors)
+          </p>
+        </div>
+        <Button
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={handleOpenAssignDialog}
+          disabled={selectedDevices.length === 0}
+        >
+          <Send className="mr-2 h-4 w-4" />
+          Assign to Distributor ({selectedDevices.length})
+        </Button>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Package className="h-8 w-8 text-blue-500" />
+              <div>
+                <p className="text-sm text-gray-600">Total Distributors</p>
+                <p className="text-2xl font-bold">{distributors.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="h-8 w-8 text-green-500" />
+              <div>
+                <p className="text-sm text-gray-600">Total Inventory</p>
+                <p className="text-2xl font-bold">{inventory.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Send className="h-8 w-8 text-purple-500" />
+              <div>
+                <p className="text-sm text-gray-600">Selected for Assignment</p>
+                <p className="text-2xl font-bold">{selectedDevices.length}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Distributors Table */}
       <Card>
         <CardHeader>
           <CardTitle>Distributor List</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 mb-4">
-            <Input placeholder="Search by name, code, district" value={query} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)} />
-            <Button onClick={() => setQuery('')}>Search</Button>
-            <Button onClick={() => downloadCSV(filtered)}>CSV</Button>
-            <Button onClick={() => downloadExcel(filtered)}>Excel</Button>
-            <Button onClick={() => printPDF(filtered)}>PDF</Button>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="text-sm">Show</div>
-              <select value={perPage} onChange={() => {}} className="border rounded px-2 py-1 text-sm">
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-              <div className="text-sm">page {page} of {Math.max(1, Math.ceil(filtered.length / perPage))}</div>
-              <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="px-2">⬅️</button>
-              <button disabled={page >= Math.ceil(filtered.length / perPage)} onClick={() => setPage(p => p + 1)} className="px-2">➡️</button>
+          <DataTable
+            data={distributors}
+            columns={distributorColumns}
+            searchable
+          />
+        </CardContent>
+      </Card>
+
+      {/* Inventory Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Available Inventory</span>
+            <div className="flex items-center gap-2 text-sm font-normal">
+              <Checkbox
+                checked={selectedDevices.length === inventory.length && inventory.length > 0}
+                onCheckedChange={handleToggleAll}
+              />
+              <span className="text-gray-600">Select All</span>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            data={inventory}
+            columns={inventoryColumns}
+            searchable
+          />
+        </CardContent>
+      </Card>
+
+      {/* Assign to Distributor Dialog */}
+      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Assign Devices to Distributor</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Distributor Selection */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Distributor</label>
+              <Select value={selectedDistributor} onValueChange={setSelectedDistributor}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a distributor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {distributors.map((distributor) => (
+                    <SelectItem key={distributor.id} value={distributor.id}>
+                      {distributor.name} - {distributor.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Selected Devices List */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Selected Devices ({selectedDevices.length})
+              </label>
+              <div className="max-h-64 overflow-y-auto border rounded-lg p-4 bg-gray-50">
+                {selectedDevices.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedDevices.map((imei) => {
+                      const device = inventory.find((item) => item.imei === imei);
+                      return (
+                        <div
+                          key={imei}
+                          className="flex items-center justify-between p-2 bg-white rounded border"
+                        >
+                          <div className="flex-1">
+                            <p className="font-mono text-sm font-medium">{imei}</p>
+                            {device && (
+                              <p className="text-xs text-gray-500">
+                                {device.serial_number} - {device.VLTD_model_code}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleToggleDevice(imei)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500">No devices selected</p>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">Entity Name</th>
-                  <th className="px-4 py-2 text-left">Entity Code</th>
-                  <th className="px-4 py-2 text-left">Address</th>
-                  <th className="px-4 py-2 text-left">District</th>
-                  <th className="px-4 py-2 text-left">Pin Code</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paged.map(d => (
-                  <tr key={d.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 align-top">{d.name}</td>
-                    <td className="px-4 py-2 align-top font-mono">{d.code}</td>
-                    <td className="px-4 py-2 align-top">{d.address}</td>
-                    <td className="px-4 py-2 align-top">{d.district}</td>
-                    <td className="px-4 py-2 align-top">{d.pincode}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAssignToDistributor}
+              disabled={!selectedDistributor || selectedDevices.length === 0 || isAssigning}
+            >
+              {isAssigning ? 'Assigning...' : 'Assign'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
