@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist" # For React+Vite. Change to "build" if CRA.
+
+# SPA Redirect for avoiding 404 on refresh
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
