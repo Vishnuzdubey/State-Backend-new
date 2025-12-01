@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { 
+import {
   Activity,
   Truck,
   Package,
@@ -24,15 +24,15 @@ export function RFCDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       const inventoryResponse = await rfcApi.getInventory();
       const devices = inventoryResponse.data;
 
       const withCert = devices.filter(d => d.certificate_number).length;
-      const jio = devices.filter(d => 
+      const jio = devices.filter(d =>
         d.eSIM_1_provider === 'Jio' || d.eSIM_2_provider === 'Jio'
       ).length;
-      const airtel = devices.filter(d => 
+      const airtel = devices.filter(d =>
         d.eSIM_1_provider === 'Airtel' || d.eSIM_2_provider === 'Airtel'
       ).length;
 

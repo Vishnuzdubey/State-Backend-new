@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { 
+import {
   Package,
   Users,
   CheckCircle2,
@@ -24,7 +24,7 @@ export function DistributorDashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch inventory and RFCs in parallel
       const [inventoryResponse, rfcResponse] = await Promise.all([
         distributorApi.getInventory({ page: 1, limit: 100000 }),

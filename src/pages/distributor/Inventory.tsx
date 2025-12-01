@@ -58,10 +58,10 @@ export function DistributorInventory() {
 
   const fetchRFCs = async (search?: string) => {
     try {
-      const response = await distributorApi.getRFCs({ 
-        page: 1, 
+      const response = await distributorApi.getRFCs({
+        page: 1,
         limit: 100,
-        search: search || rfcSearchTerm 
+        search: search || rfcSearchTerm
       });
       setRfcs(response.rfcs);
     } catch (err) {
@@ -81,7 +81,7 @@ export function DistributorInventory() {
       console.log('Starting RFC assignment...');
       console.log('RFC ID:', selectedRFC);
       console.log('IMEIs:', selectedDevices);
-      
+
       await distributorApi.assignToRFC({
         rfcId: selectedRFC,
         imeis: selectedDevices,
@@ -99,7 +99,7 @@ export function DistributorInventory() {
         stack: err instanceof Error ? err.stack : undefined,
         error: err,
       });
-      
+
       const errorMessage = err instanceof Error ? err.message : 'Failed to assign devices';
       alert(`Assignment failed: ${errorMessage}`);
     } finally {

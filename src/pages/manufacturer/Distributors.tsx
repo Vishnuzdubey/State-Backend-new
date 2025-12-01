@@ -67,7 +67,7 @@ export default function ManufacturerDistributors() {
       console.log('Starting distributor assignment...');
       console.log('Distributor ID:', selectedDistributor);
       console.log('IMEIs:', selectedDevices);
-      
+
       await manufacturerApi.assignToDistributor({
         distributorId: selectedDistributor,
         imeis: selectedDevices,
@@ -85,7 +85,7 @@ export default function ManufacturerDistributors() {
         stack: err instanceof Error ? err.stack : undefined,
         error: err,
       });
-      
+
       const errorMessage = err instanceof Error ? err.message : 'Failed to assign devices';
       alert(`Assignment failed: ${errorMessage}`);
     } finally {
