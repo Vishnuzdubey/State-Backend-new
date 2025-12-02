@@ -1,34 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Download, FileText, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/common/DataTable';
 import { useNavigate } from 'react-router-dom';
-
-interface Distributor {
-  id: string;
-  entityName: string;
-  code: string;
-  address: string;
-  district: string;
-  pinCode: string;
-  manufacturer: string;
-}
+import { superAdminApi, type DistributorData } from '@/api/superAdmin';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function Distributors() {
   const navigate = useNavigate();
-  const [manufacturerFilter, setManufacturerFilter] = useState('');
+  const [distributors, setDistributors] = useState<DistributorData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  // Mock manufacturers for filter
-  const manufacturers = [
-    { id: '1', name: 'Watsoo Express' },
-    { id: '2', name: 'Ecogas Impex' },
-    { id: '3', name: 'TechFlow Solutions' },
-  ];
+  useEffect(() => {
+    fetchDistributors();
+  }, []);
 
-  // Updated distributor data with your examples
-  const [distributors] = useState<Distributor[]>([
+  const fetchDistributors = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await superAdminApi.getDistributors({ page: 1, limit: 100, search });
+      setDistributors(response.distributors);
+    } catch (err) {
+      console.error('Failed to fetch distributors:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load distributors');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Search with API
+  const handleSearch = () => {
+    fetchDistributors();
+  };
+
+  const [distributorsOld] = useState<any[]>([
     {
       id: '1',
       entityName: 'R K Enterprises',
@@ -85,44 +94,54 @@ export function Distributors() {
     },
   ]);
 
-  // Filter and search logic
-  const filteredDistributors = distributors.filter(distributor =>
-    (!manufacturerFilter || distributor.manufacturer === manufacturerFilter) &&
-    (
-      distributor.entityName.toLowerCase().includes(search.toLowerCase()) ||
-      distributor.code.toLowerCase().includes(search.toLowerCase()) ||
-      distributor.district.toLowerCase().includes(search.toLowerCase())
-    )
-  );
-
   const columns = [
     {
-      key: 'entityName',
-      header: 'Entity Name',
+      key: 'name',
+      header: 'Name',
       render: (value: string, row: any) => (
         <button
-          className="text-blue-600 underline hover:text-blue-800 text-left"
+          className="text-blue-600 underline hover:text-blue-800 text-left font-medium"
           onClick={() => navigate(`/super-admin/distributors/${row.id}`)}
         >
-          {value}
+          {value || 'Unnamed Distributor'}
         </button>
       ),
       sortable: true,
     },
-    { key: 'code', header: 'Entity Code', sortable: true },
-    { key: 'address', header: 'Address' },
-    { key: 'district', header: 'District', sortable: true },
-    { key: 'pinCode', header: 'Pin Code' },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (value: string) => (
+        <span className="text-gray-700">{value}</span>
+      ),
+      sortable: true
+    },
+    {
+      key: 'createdAt',
+      header: 'Created Date',
+      render: (value: string) => (
+        <span className="text-sm text-gray-500">
+          {new Date(value).toLocaleDateString()}
+        </span>
+      ),
+      sortable: true
+    },
   ];
 
   const actions = [
     { label: 'Edit', onClick: (row: any) => console.log('Edit', row) },
   ];
 
-  // Export handlers (mock)
-  const handleExport = (type: string) => {
-    alert(`Exporting as ${type}`);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading distributors...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 w-full">
@@ -130,14 +149,9 @@ export function Distributors() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">DISTRIBUTORS LIST</h1>
+          <p className="text-gray-600">{distributors.length} distributor(s) found</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/super-admin/distributors/map')}
-          >
-            Distributor Map
-          </Button>
           <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => navigate('/super-admin/distributors/add')}
@@ -148,54 +162,41 @@ export function Distributors() {
         </div>
       </div>
 
-      {/* Filter, Count, Export, Search */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex gap-4 items-center">
-          <label className="font-medium">Filter By Manufacturer:</label>
-          <select
-            className="border rounded px-2 py-1"
-            value={manufacturerFilter}
-            onChange={e => setManufacturerFilter(e.target.value)}
-          >
-            <option value="">All</option>
-            {manufacturers.map(m => (
-              <option key={m.id} value={m.name}>{m.name}</option>
-            ))}
-          </select>
-          <span className="ml-6 text-lg font-semibold">
-            Total Count: <span className="text-blue-600">{filteredDistributors.length}</span>
-          </span>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleExport('CSV')}>
-            <FileText className="h-4 w-4 mr-2" /> CSV
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport('Excel')}>
-            <Download className="h-4 w-4 mr-2" /> Excel
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport('PDF')}>
-            <FileText className="h-4 w-4 mr-2" /> PDF
-          </Button>
-        </div>
-        <div className="flex gap-2 items-center">
-          <Input
-            placeholder="Search"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-48"
-          />
-          <Search className="text-gray-400" />
-        </div>
-      </div>
+      )}
+
+      {/* Search */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && handleSearch()}
+              className="flex-1"
+            />
+            <Button onClick={handleSearch}>
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Distributors Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <DataTable
-          data={filteredDistributors}
-          columns={columns}
-          actions={actions}
-        />
-      </div>
+      <Card>
+        <CardContent className="p-0">
+          <DataTable
+            data={distributors}
+            columns={columns}
+            searchable={false}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -57,14 +57,25 @@ export function ManufacturerDetails() {
     }
   };
 
-  const handleUpdateStatus = async (newStatus: 'PENDING' | 'ACKNOWLEDGED' | 'APPROVED', pwd?: string) => {
+  const handleUpdateStatus = async (newStatus: 'PENDING' | 'ACKNOWLEDGED' | 'APPROVED', pwd: string) => {
     if (!manufacturer) return;
+
+    // Validate password
+    if (!pwd || pwd.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
 
     setIsUpdating(true);
     setError(null);
     setSuccess(null);
 
     try {
+      console.log('🔄 Updating manufacturer status...');
+      console.log('Manufacturer ID:', manufacturer.id);
+      console.log('New Status:', newStatus);
+      console.log('Password length:', pwd.length);
+
       await superAdminApi.updateManufacturerStatus(manufacturer.id, {
         status: newStatus,
         password: pwd,
@@ -77,6 +88,12 @@ export function ManufacturerDetails() {
       // Refresh data
       await fetchManufacturerDetails();
     } catch (err: any) {
+      console.error('❌ Failed to update manufacturer status:', err);
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        error: err,
+      });
       setError(err.message || 'Failed to update status');
     } finally {
       setIsUpdating(false);
@@ -272,7 +289,15 @@ export function ManufacturerDetails() {
           )}
           {canApprove && (
             <Button
-              onClick={() => handleUpdateStatus('APPROVED')}
+              onClick={() => {
+                // Use existing password or prompt for it
+                const pwd = manufacturer.password || prompt('Enter password for approval (min 6 characters):');
+                if (pwd && pwd.length >= 6) {
+                  handleUpdateStatus('APPROVED', pwd);
+                } else {
+                  setError('Valid password required for approval');
+                }
+              }}
               className="bg-green-600"
               disabled={isUpdating}
             >

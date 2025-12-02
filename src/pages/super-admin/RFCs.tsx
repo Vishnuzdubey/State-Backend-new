@@ -1,24 +1,43 @@
-import { useState } from 'react';
-import { Plus, Download, FileText, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/DataTable';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { superAdminApi, type RFCData } from '@/api/superAdmin';
 
 export function RFCs() {
   const navigate = useNavigate();
-  const [manufacturerFilter, setManufacturerFilter] = useState('');
+  const [rfcs, setRfcs] = useState<RFCData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  // Mock manufacturers for filter
-  const manufacturers = [
-    { id: '1', name: 'Watsoo Express' },
-    { id: '2', name: 'Ecogas Impex' },
-    { id: '3', name: 'TechFlow Solutions' },
-  ];
+  useEffect(() => {
+    fetchRFCs();
+  }, []);
 
-  // RFCs mock data (randomized)
-  const [rfcs] = useState([
+  const fetchRFCs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await superAdminApi.getRFCs({ page: 1, limit: 100, search });
+      setRfcs(response.rfcs);
+    } catch (err) {
+      console.error('Failed to fetch RFCs:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load RFCs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Search with API
+  const handleSearch = () => {
+    fetchRFCs();
+  };
+
+  const [rfcsOld] = useState([
     {
       id: '1',
       name: 'FleetX Solutions',
@@ -66,50 +85,57 @@ export function RFCs() {
     },
   ]);
 
-  // Filter and search logic
-  const filteredRFCs = rfcs.filter(rfc =>
-    (!manufacturerFilter || rfc.manufacturer === manufacturerFilter) &&
-    (
-      rfc.name.toLowerCase().includes(search.toLowerCase()) ||
-      rfc.code.toLowerCase().includes(search.toLowerCase()) ||
-      rfc.district.toLowerCase().includes(search.toLowerCase())
-    )
-  );
-
   const columns = [
     {
       key: 'name',
-      header: 'Entity Name',
+      header: 'Name',
       render: (value: string, row: any) => (
         <button
-          className="text-blue-600 underline hover:text-blue-800"
+          className="text-blue-600 underline hover:text-blue-800 text-left font-medium"
           onClick={() => navigate(`/super-admin/rfcs/${row.id}`)}
         >
-          {value}
+          {value || 'Unnamed RFC'}
         </button>
       ),
       sortable: true,
     },
-    { key: 'code', header: 'Entitiy Code', sortable: true },
-    { key: 'address', header: 'Address' },
-    { key: 'district', header: 'District', sortable: true },
-    { key: 'pinCode', header: 'Pin Code' },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (value: string) => (
+        <span className="text-gray-700">{value}</span>
+      ),
+      sortable: true
+    },
+    {
+      key: 'createdAt',
+      header: 'Created Date',
+      render: (value: string) => (
+        <span className="text-sm text-gray-500">
+          {new Date(value).toLocaleDateString()}
+        </span>
+      ),
+      sortable: true
+    },
   ];
 
-  const actions = [
-    { label: 'Edit', onClick: (row: any) => console.log('Edit', row) },
-  ];
-
-  // Export handlers (mock)
-  const handleExport = (type: string) => {
-    alert(`Exporting as ${type}`);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading RFCs...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 w-full">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">RFC LIST</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">RFCs LIST</h1>
+          <p className="text-gray-600">{rfcs.length} RFC(s) found</p>
         </div>
         <Button
           className="bg-blue-600 hover:bg-blue-700"
@@ -120,53 +146,41 @@ export function RFCs() {
         </Button>
       </div>
 
-      {/* Filter, Count, Export, Search */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex gap-4 items-center">
-          <label className="font-medium">Filter By Manufacturer:</label>
-          <select
-            className="border rounded px-2 py-1"
-            value={manufacturerFilter}
-            onChange={e => setManufacturerFilter(e.target.value)}
-          >
-            <option value="">All</option>
-            {manufacturers.map(m => (
-              <option key={m.id} value={m.name}>{m.name}</option>
-            ))}
-          </select>
-          <span className="ml-6 text-lg font-semibold">
-            Total Count: <span className="text-blue-600">{filteredRFCs.length}</span>
-          </span>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleExport('CSV')}>
-            <FileText className="h-4 w-4 mr-2" /> CSV
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport('Excel')}>
-            <Download className="h-4 w-4 mr-2" /> Excel
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => handleExport('PDF')}>
-            <FileText className="h-4 w-4 mr-2" /> PDF
-          </Button>
-        </div>
-        <div className="flex gap-2 items-center">
-          <Input
-            placeholder="Search"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-48"
-          />
-          <Search className="text-gray-400" />
-        </div>
-      </div>
+      )}
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <DataTable
-          data={filteredRFCs}
-          columns={columns}
-          actions={actions}
-        />
-      </div>
+      {/* Search */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && handleSearch()}
+              className="flex-1"
+            />
+            <Button onClick={handleSearch}>
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* RFCs Table */}
+      <Card>
+        <CardContent className="p-0">
+          <DataTable
+            data={rfcs}
+            columns={columns}
+            searchable={false}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -49,12 +49,62 @@ export interface GetManufacturersResponse {
 
 export interface UpdateManufacturerStatusRequest {
   status: 'PENDING' | 'ACKNOWLEDGED' | 'APPROVED';
-  password?: string;
+  password: string;
 }
 
 export interface UpdateManufacturerStatusResponse {
   status: string;
   message: string;
+}
+
+// Distributor Management Types
+export interface DistributorData {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface GetDistributorsResponse {
+  distributors: DistributorData[];
+}
+
+export interface CreateDistributorRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface CreateDistributorResponse {
+  status: string;
+  message: string;
+  distributor: DistributorData;
+}
+
+// RFC Management Types
+export interface RFCData {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface GetRFCsResponse {
+  rfcs: RFCData[];
+}
+
+export interface CreateRFCRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface CreateRFCResponse {
+  status: string;
+  message: string;
+  rfc: RFCData;
 }
 
 // Device Management Types
@@ -378,6 +428,10 @@ export const superAdminApi = {
     if (!token) throw new Error('Not authenticated');
 
     console.log(`🔄 Updating manufacturer ${manufacturerId} status to ${statusData.status}`);
+    console.log('📤 Request URL:', `${API_BASE_URL}/admin/manufacturer/${manufacturerId}/status`);
+    console.log('📤 Request body:', JSON.stringify(statusData, null, 2));
+    console.log('🔑 Token:', token);
+    
     const response = await fetch(`${API_BASE_URL}/admin/manufacturer/${manufacturerId}/status`, {
       method: 'PATCH',
       headers: {
@@ -388,14 +442,28 @@ export const superAdminApi = {
       mode: 'cors',
     });
 
+    console.log('📥 Response status:', response.status);
+    console.log('📥 Response statusText:', response.statusText);
+    console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+
+    const contentType = response.headers.get('content-type');
+    
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('❌ Non-JSON response received:');
+      console.error('First 500 chars:', text.substring(0, 500));
+      throw new Error(`Server returned non-JSON response (Status: ${response.status}). Response: ${text.substring(0, 200)}`);
+    }
+
     const data = await response.json();
+    console.log('📥 Response data:', data);
 
     if (response.ok && data.status === 'success') {
       console.log('✅ Manufacturer status updated successfully');
       return data;
     }
 
-    throw new Error(data.message || 'Failed to update manufacturer status');
+    throw new Error(data.message || `Failed to update manufacturer status (Status: ${response.status})`);
   },
 
   // Device Management
@@ -706,5 +774,173 @@ export const superAdminApi = {
     }
 
     throw new Error(data.message || 'Failed to delete user');
+  },
+
+  // Distributor Management
+  getDistributors: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }): Promise<GetDistributorsResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    const queryParams = new URLSearchParams({
+      page: String(params?.page || 1),
+      limit: String(params?.limit || 100),
+      search: params?.search || '',
+    });
+
+    console.log('🏢 Fetching distributors...');
+    const response = await fetch(`${API_BASE_URL}/admin/distributor?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.distributors) {
+      console.log('✅ Distributors fetched:', data.distributors.length);
+      return data;
+    }
+
+    throw new Error('Failed to fetch distributors');
+  },
+
+  createDistributor: async (distributorData: CreateDistributorRequest): Promise<CreateDistributorResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log('➕ Creating new distributor...');
+    const response = await fetch(`${API_BASE_URL}/admin/distributor`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(distributorData),
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ Distributor created successfully');
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to create distributor');
+  },
+
+  getDistributorById: async (id: string): Promise<DistributorData> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`📋 Fetching distributor details for ID: ${id}`);
+    const response = await fetch(`${API_BASE_URL}/admin/distributor/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.distributor) {
+      console.log('✅ Distributor details fetched');
+      return data.distributor;
+    }
+
+    throw new Error(data.message || 'Failed to fetch distributor details');
+  },
+
+  // RFC Management
+  getRFCs: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }): Promise<GetRFCsResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    const queryParams = new URLSearchParams({
+      page: String(params?.page || 1),
+      limit: String(params?.limit || 100),
+      search: params?.search || '',
+    });
+
+    console.log('🏛️ Fetching RFCs...');
+    const response = await fetch(`${API_BASE_URL}/admin/rfc?${queryParams}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.rfcs) {
+      console.log('✅ RFCs fetched:', data.rfcs.length);
+      return data;
+    }
+
+    throw new Error('Failed to fetch RFCs');
+  },
+
+  createRFC: async (rfcData: CreateRFCRequest): Promise<CreateRFCResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log('➕ Creating new RFC...');
+    const response = await fetch(`${API_BASE_URL}/admin/rfc`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(rfcData),
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ RFC created successfully');
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to create RFC');
+  },
+
+  getRFCById: async (id: string): Promise<RFCData> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`📋 Fetching RFC details for ID: ${id}`);
+    const response = await fetch(`${API_BASE_URL}/admin/rfc/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.rfc) {
+      console.log('✅ RFC details fetched');
+      return data.rfc;
+    }
+
+    throw new Error(data.message || 'Failed to fetch RFC details');
   },
 };

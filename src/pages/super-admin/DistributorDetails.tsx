@@ -1,28 +1,48 @@
-
-import { ArrowLeft, Users, Smartphone, MapPin } from 'lucide-react';
+﻿import { useState, useEffect } from 'react';
+import { ArrowLeft, Users, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/common/DataTable';
 import { useNavigate, useParams } from 'react-router-dom';
+import { superAdminApi, type DistributorData } from '@/api/superAdmin';
 
 export function DistributorDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [distributorData, setDistributorData] = useState<DistributorData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock distributor data based on the ID
-  const distributorData = {
-    id: id,
-    entityCode: 'BTC',
-    entityName: 'Bharat Trading Company',
-    gstPan: 'N/A',
-    location: 'Plot No. 877, In Steel Warehousing Complex, Steel Market Road, On Service Road',
-    district: 'Raigad',
-    state: 'Maharashtra',
-    pinCode: '410218'
-  };
+  useEffect(() => {
+    if (id) {
+      fetchDistributorDetails();
+    }
+  }, [id]);
 
-  // Mock user details
+  const fetchDistributorDetails = async () => {
+    if (!id) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Try to get from list endpoint since individual endpoint may not exist
+      const response = await superAdminApi.getDistributors({ page: 1, limit: 100, search: '' });
+      const distributor = response.distributors.find(d => d.id === id);
+
+      if (!distributor) {
+        throw new Error('Distributor not found');
+      }
+
+      setDistributorData(distributor);
+    } catch (err) {
+      console.error('Failed to fetch distributor details:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load distributor details');
+    } finally {
+      setLoading(false);
+    }
+  };  // Mock user details
   const userDetails = [
     {
       id: 1,
@@ -71,39 +91,37 @@ export function DistributorDetails() {
     }
   ];
 
-  // Mock device details (empty for now)
- 
   const userColumns = [
-    { 
-      key: 'fullName', 
+    {
+      key: 'fullName',
       header: 'Full Name',
       render: (value: string) => (
         <div className="font-medium">{value}</div>
       )
     },
-    { 
-      key: 'username', 
+    {
+      key: 'username',
       header: 'Username',
       render: (value: string) => (
         <div className="font-mono text-sm">{value}</div>
       )
     },
-    { 
-      key: 'designation', 
+    {
+      key: 'designation',
       header: 'Designation',
       render: (value: string) => (
         <Badge variant="outline">{value}</Badge>
       )
     },
-    { 
-      key: 'emailId', 
+    {
+      key: 'emailId',
       header: 'Email Id',
       render: (value: string) => (
         <div className="text-blue-600">{value}</div>
       )
     },
-    { 
-      key: 'contactNo', 
+    {
+      key: 'contactNo',
       header: 'Contact No.',
       render: (value: string) => (
         <div className="font-mono">{value}</div>
@@ -124,13 +142,44 @@ export function DistributorDetails() {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading distributor details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !distributorData) {
+    return (
+      <div className="space-y-6 w-full">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/super-admin/distributors')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error || 'Distributor not found'}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 w-full">
       {/* Header with Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => navigate('/super-admin/distributors')}
           >
@@ -143,15 +192,8 @@ export function DistributorDetails() {
             <span className="text-gray-900 font-medium">Distributor Details</span>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/super-admin/distributors/map')}
-          >
-            <MapPin className="h-4 w-4 mr-2" />
-            Distributor Map
-          </Button>
           <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => navigate('/super-admin/distributors/add')}
@@ -172,53 +214,39 @@ export function DistributorDetails() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">Entity Code</label>
-                <div className="mt-1 text-lg font-semibold text-gray-900">
-                  {distributorData.entityCode}
+                <label className="text-sm font-medium text-gray-600">ID</label>
+                <div className="mt-1 text-sm font-mono text-gray-900">
+                  {distributorData.id}
                 </div>
               </div>
-              
+
               <div>
-                <label className="text-sm font-medium text-gray-600">Entity Name</label>
+                <label className="text-sm font-medium text-gray-600">Name</label>
                 <div className="mt-1 text-lg font-medium text-gray-900">
-                  {distributorData.entityName}
+                  {distributorData.name || 'N/A'}
                 </div>
               </div>
-              
+
               <div>
-                <label className="text-sm font-medium text-gray-600">GST/PAN</label>
-                <div className="mt-1 text-gray-900">
-                  {distributorData.gstPan}
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-gray-600">Location</label>
-                <div className="mt-1 text-gray-900">
-                  {distributorData.location}
+                <label className="text-sm font-medium text-gray-600">Email</label>
+                <div className="mt-1 text-blue-600">
+                  {distributorData.email}
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">District</label>
+                <label className="text-sm font-medium text-gray-600">Created At</label>
                 <div className="mt-1 text-gray-900">
-                  {distributorData.district}
+                  {new Date(distributorData.createdAt).toLocaleString()}
                 </div>
               </div>
-              
+
               <div>
-                <label className="text-sm font-medium text-gray-600">State</label>
-                <div className="mt-1 text-gray-900">
-                  {distributorData.state}
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-gray-600">Pin Code</label>
-                <div className="mt-1 text-gray-900">
-                  {distributorData.pinCode}
+                <label className="text-sm font-medium text-gray-600">Password</label>
+                <div className="mt-1 text-gray-900 font-mono">
+                  {distributorData.password ? '••••••' : 'N/A'}
                 </div>
               </div>
             </div>
