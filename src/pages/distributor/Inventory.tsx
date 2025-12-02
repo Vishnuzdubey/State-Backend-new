@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Package, Send, Wifi, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/common/DataTable';
 import { distributorApi, type InventoryDevice, type RFCData } from '@/api/distributor';
@@ -34,7 +34,7 @@ export function DistributorInventory() {
   const [selectedRFC, setSelectedRFC] = useState('');
   const [isAssigning, setIsAssigning] = useState(false);
   const [rfcSearchTerm, setRfcSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
+  const [page,] = useState(1);
   const [limit] = useState(100);
 
   useEffect(() => {
@@ -134,12 +134,7 @@ export function DistributorInventory() {
   const columns = [
     {
       key: 'select',
-      header: () => (
-        <Checkbox
-          checked={selectedDevices.length === inventory.length && inventory.length > 0}
-          onCheckedChange={handleToggleAll}
-        />
-      ),
+      header: '',
       render: (_value: any, row: InventoryDevice) => (
         <Checkbox
           checked={selectedDevices.includes(row.imei)}
@@ -288,6 +283,18 @@ export function DistributorInventory() {
 
       {/* Inventory Table */}
       <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Inventory Devices</span>
+            <div className="flex items-center gap-2 text-sm font-normal">
+              <Checkbox
+                checked={selectedDevices.length === inventory.length && inventory.length > 0}
+                onCheckedChange={handleToggleAll}
+              />
+              <span className="text-gray-600">Select All</span>
+            </div>
+          </CardTitle>
+        </CardHeader>
         <CardContent className="p-0">
           <DataTable
             data={inventory}
