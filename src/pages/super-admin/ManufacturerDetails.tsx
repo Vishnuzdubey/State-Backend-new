@@ -9,7 +9,8 @@ import {
   Users,
   CheckCircle,
   XCircle,
-  ExternalLink
+  ExternalLink,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,12 +32,26 @@ export function ManufacturerDetails() {
   const [showAcknowledgeModal, setShowAcknowledgeModal] = useState(false);
   const [password, setPassword] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [distributors, setDistributors] = useState<any[]>([]);
+  const [availableDistributors, setAvailableDistributors] = useState<any[]>([]);
+  const [loadingDistributors, setLoadingDistributors] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');
+  const [allRFCs, setAllRFCs] = useState<any[]>([]);
+  const [loadingRFCs, setLoadingRFCs] = useState(false);
+  const [showAssignDistributor, setShowAssignDistributor] = useState(false);
 
   useEffect(() => {
     fetchManufacturerDetails();
     // Check if we should open acknowledge modal
     if (location.state?.action === 'acknowledge') {
       setShowAcknowledgeModal(true);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchManufacturerDistributors();
+      fetchAvailableDistributors();
     }
   }, [id]);
 
@@ -54,6 +69,84 @@ export function ManufacturerDetails() {
       setError(err.message || 'Failed to fetch manufacturer details');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchManufacturerDistributors = async () => {
+    if (!id) return;
+    
+    try {
+      setLoadingDistributors(true);
+      const response = await superAdminApi.getManufacturerDistributors(id);
+      setDistributors(response.data);
+    } catch (err: any) {
+      console.error('Failed to fetch manufacturer distributors:', err);
+    } finally {
+      setLoadingDistributors(false);
+    }
+  };
+
+  const fetchAvailableDistributors = async () => {
+    try {
+      const response = await superAdminApi.getDistributors({ page: 1, limit: 100, search: '' });
+      setAvailableDistributors(response.distributors);
+    } catch (err: any) {
+      console.error('Failed to fetch available distributors:', err);
+    }
+  };
+
+  const fetchAllRFCs = async () => {
+    if (!distributors.length) return;
+    
+    try {
+      setLoadingRFCs(true);
+      const rfcPromises = distributors.map(async (distributor) => {
+        try {
+          const response = await superAdminApi.getDistributorRFCs(distributor.id);
+          return response.rfcs.map((rfc: any) => ({
+            ...rfc,
+            distributorName: distributor.name,
+            distributorId: distributor.id
+          }));
+        } catch (err) {
+          console.error(`Failed to fetch RFCs for distributor ${distributor.id}:`, err);
+          return [];
+        }
+      });
+      
+      const rfcArrays = await Promise.all(rfcPromises);
+      const allRFCsList = rfcArrays.flat();
+      setAllRFCs(allRFCsList);
+    } catch (err: any) {
+      console.error('Failed to fetch RFCs:', err);
+    } finally {
+      setLoadingRFCs(false);
+    }
+  };
+
+  const handleAssignDistributor = async (distributorId: string) => {
+    if (!id) return;
+    
+    try {
+      setError(null);
+      await superAdminApi.assignDistributorToManufacturer(id, { distributorId });
+      setSuccess('Distributor assigned successfully');
+      await fetchManufacturerDistributors();
+    } catch (err: any) {
+      setError(err.message || 'Failed to assign distributor');
+    }
+  };
+
+  const handleRemoveDistributor = async (distributorId: string) => {
+    if (!id) return;
+    
+    try {
+      setError(null);
+      await superAdminApi.removeDistributorFromManufacturer(id, { distributorId });
+      setSuccess('Distributor removed successfully');
+      await fetchManufacturerDistributors();
+    } catch (err: any) {
+      setError(err.message || 'Failed to remove distributor');
     }
   };
 
@@ -182,16 +275,63 @@ export function ManufacturerDetails() {
     }
   ];
 
-  const distributors = [
-    { id: '1', name: 'Metro Distributors Pvt Ltd', code: 'METRO001', city: 'Mumbai' },
-    { id: '2', name: 'Global Supply Chain Ltd', code: 'GLOBAL002', city: 'Delhi' },
-    { id: '3', name: 'Tech Distribution Services', code: 'TECH003', city: 'Bangalore' }
+  const distributorColumns = [
+    { 
+      key: 'name', 
+      header: 'Name',
+      render: (value: string) => <span className="font-medium">{value || 'N/A'}</span>
+    },
+    { key: 'email', header: 'Email' },
+    { 
+      key: 'createdAt', 
+      header: 'Created Date',
+      render: (value: string) => new Date(value).toLocaleDateString()
+    },
   ];
 
-  const rfcs = [
-    { id: '1', name: 'SmartTrack RFC Solutions', code: 'SMART001', city: 'Gurgaon' },
-    { id: '2', name: 'VehicleTech RFC Services', code: 'VEH002', city: 'Noida' },
-    { id: '3', name: 'GPS Plus RFC Network', code: 'GPS003', city: 'Faridabad' }
+  const distributorActions = [
+    {
+      label: 'Remove',
+      onClick: (row: any) => handleRemoveDistributor(row.id),
+      variant: 'destructive' as const
+    },
+    {
+      label: 'View Details',
+      onClick: (row: any) => navigate(`/super-admin/distributors/${row.id}`),
+      icon: Eye
+    }
+  ];
+
+  const rfcColumns = [
+    { 
+      key: 'name', 
+      header: 'RFC Name',
+      render: (value: string) => <span className="font-medium">{value || 'N/A'}</span>
+    },
+    { key: 'email', header: 'Email' },
+    { 
+      key: 'distributorName', 
+      header: 'Distributor',
+      render: (value: string) => <span className="text-blue-600">{value}</span>
+    },
+    { 
+      key: 'createdAt', 
+      header: 'Created Date',
+      render: (value: string) => new Date(value).toLocaleDateString()
+    },
+  ];
+
+  const rfcActions = [
+    {
+      label: 'View RFC',
+      onClick: (row: any) => navigate(`/super-admin/rfcs/${row.id}`),
+      icon: Eye
+    },
+    {
+      label: 'View Distributor',
+      onClick: (row: any) => navigate(`/super-admin/distributors/${row.distributorId}`),
+      icon: Building2
+    }
   ];
 
   return (
@@ -229,19 +369,40 @@ export function ManufacturerDetails() {
 
       {/* Navigation Tabs */}
       <div className="flex gap-4 border-b">
-        <button className="px-4 py-2 text-sm font-medium border-b-2 border-blue-600 text-blue-600">
+        <button 
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          onClick={() => setActiveTab('details')}
+        >
           All Details
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <button 
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'account' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          onClick={() => setActiveTab('account')}
+        >
           Account
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <button 
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'distributors' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          onClick={() => {
+            setActiveTab('distributors');
+            if (distributors.length === 0) fetchManufacturerDistributors();
+          }}
+        >
           Distributors
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <button 
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'rfcs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          onClick={() => {
+            setActiveTab('rfcs');
+            fetchAllRFCs();
+          }}
+        >
           RFCs
         </button>
-        <button className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+        <button 
+          className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'devices' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          onClick={() => setActiveTab('devices')}
+        >
           Devices
         </button>
       </div>
@@ -259,6 +420,9 @@ export function ManufacturerDetails() {
         </Alert>
       )}
 
+      {/* All Details Tab */}
+      {activeTab === 'details' && (
+        <>
       {/* Status and Actions */}
       <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
         <div className="flex items-center gap-4">
@@ -482,52 +646,144 @@ export function ManufacturerDetails() {
         </CardContent>
       </Card>
 
-      {/* Associated Distributors and RFCs */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Distributors */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Associated Distributors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {distributors.map((distributor) => (
-                <div key={distributor.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{distributor.name}</p>
-                    <p className="text-sm text-gray-500">{distributor.code} • {distributor.city}</p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    View
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        </>
+      )}
 
-        {/* RFCs */}
+      {/* Distributors Tab */}
+      {activeTab === 'distributors' && (
         <Card>
           <CardHeader>
-            <CardTitle>Associated RFCs</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>Associated Distributors ({distributors.length})</CardTitle>
+              <Button
+                onClick={() => setShowAssignDistributor(!showAssignDistributor)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Assign Distributor
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {rfcs.map((rfc) => (
-                <div key={rfc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{rfc.name}</p>
-                    <p className="text-sm text-gray-500">{rfc.code} • {rfc.city}</p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    View
-                  </Button>
+            {showAssignDistributor && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <h4 className="text-sm font-medium mb-3">Select Distributor to Assign</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {availableDistributors
+                    .filter(d => !distributors.find(ad => ad.id === d.id))
+                    .map(d => (
+                      <div key={d.id} className="flex items-center justify-between p-3 bg-white border rounded hover:border-blue-500">
+                        <div>
+                          <p className="font-medium">{d.name || 'Unnamed'}</p>
+                          <p className="text-sm text-gray-600">{d.email}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            handleAssignDistributor(d.id);
+                            setShowAssignDistributor(false);
+                          }}
+                        >
+                          Assign
+                        </Button>
+                      </div>
+                    ))}
+                  {availableDistributors.filter(d => !distributors.find(ad => ad.id === d.id)).length === 0 && (
+                    <p className="text-center text-gray-500 py-4">All distributors are already assigned</p>
+                  )}
                 </div>
-              ))}
+              </div>
+            )}
+
+            {loadingDistributors ? (
+              <div className="text-center py-8 text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p>Loading distributors...</p>
+              </div>
+            ) : distributors.length > 0 ? (
+              <DataTable
+                data={distributors}
+                columns={distributorColumns}
+                actions={distributorActions}
+                searchable={false}
+                pagination={false}
+              />
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No distributors assigned yet</p>
+                <p className="text-sm">Click "Assign Distributor" to add one</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* RFCs Tab */}
+      {activeTab === 'rfcs' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>All RFCs from Distributors ({allRFCs.length})</CardTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              Showing all RFCs from all distributors assigned to this manufacturer
+            </p>
+          </CardHeader>
+          <CardContent>
+            {loadingRFCs ? (
+              <div className="text-center py-8 text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p>Loading RFCs...</p>
+              </div>
+            ) : allRFCs.length > 0 ? (
+              <DataTable
+                data={allRFCs}
+                columns={rfcColumns}
+                actions={rfcActions}
+                searchable={true}
+                pagination={true}
+              />
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No RFCs found</p>
+                <p className="text-sm">
+                  {distributors.length === 0 
+                    ? 'No distributors assigned to this manufacturer yet'
+                    : 'None of the assigned distributors have RFCs'}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Account Tab */}
+      {activeTab === 'account' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12 text-gray-500">
+              <p>Account details coming soon...</p>
             </div>
           </CardContent>
         </Card>
-      </div>
+      )}
+
+      {/* Devices Tab */}
+      {activeTab === 'devices' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Devices</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12 text-gray-500">
+              <p>Device information coming soon...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

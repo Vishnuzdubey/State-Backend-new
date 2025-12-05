@@ -222,7 +222,7 @@ export function RFCDetails() {
       </Card>
 
       {/* RFC User Details */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -244,7 +244,7 @@ export function RFCDetails() {
             </div>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* RFC Device Details */}
       <Card>

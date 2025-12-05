@@ -82,6 +82,29 @@ export interface CreateDistributorResponse {
   distributor: DistributorData;
 }
 
+export interface GetManufacturerDistributorsResponse {
+  status: string;
+  data: DistributorData[];
+}
+
+export interface AssignDistributorRequest {
+  distributorId: string;
+}
+
+export interface AssignDistributorResponse {
+  status: string;
+  message: string;
+}
+
+export interface RemoveDistributorRequest {
+  distributorId: string;
+}
+
+export interface RemoveDistributorResponse {
+  status: string;
+  message: string;
+}
+
 // RFC Management Types
 export interface RFCData {
   id: string;
@@ -105,6 +128,26 @@ export interface CreateRFCResponse {
   status: string;
   message: string;
   rfc: RFCData;
+}
+
+export interface GetDistributorRFCsResponse {
+  rfcs: RFCData[];
+}
+
+export interface AssignRFCRequest {
+  rfcId: string;
+}
+
+export interface AssignRFCResponse {
+  status: string;
+}
+
+export interface RemoveRFCRequest {
+  rfcId: string;
+}
+
+export interface RemoveRFCResponse {
+  status: string;
 }
 
 // Device Management Types
@@ -942,5 +985,155 @@ export const superAdminApi = {
     }
 
     throw new Error(data.message || 'Failed to fetch RFC details');
+  },
+
+  // Manufacturer-Distributor Relationship Management
+  getManufacturerDistributors: async (manufacturerId: string): Promise<GetManufacturerDistributorsResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`🏢 Fetching distributors for manufacturer: ${manufacturerId}`);
+    const response = await fetch(`${API_BASE_URL}/admin/manufacturer/distributors/${manufacturerId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ Manufacturer distributors fetched:', data.data.length);
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to fetch manufacturer distributors');
+  },
+
+  assignDistributorToManufacturer: async (manufacturerId: string, request: AssignDistributorRequest): Promise<AssignDistributorResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`➕ Assigning distributor ${request.distributorId} to manufacturer ${manufacturerId}`);
+    const response = await fetch(`${API_BASE_URL}/admin/manufacturer/distributors/assign/${manufacturerId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ Distributor assigned successfully');
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to assign distributor');
+  },
+
+  removeDistributorFromManufacturer: async (manufacturerId: string, request: RemoveDistributorRequest): Promise<RemoveDistributorResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`➖ Removing distributor ${request.distributorId} from manufacturer ${manufacturerId}`);
+    const response = await fetch(`${API_BASE_URL}/admin/manufacturer/distributors/remove/${manufacturerId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ Distributor removed successfully');
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to remove distributor');
+  },
+
+  // Distributor-RFC Relationship Management
+  getDistributorRFCs: async (distributorId: string): Promise<GetDistributorRFCsResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`🏛️ Fetching RFCs for distributor: ${distributorId}`);
+    const response = await fetch(`${API_BASE_URL}/admin/distributor/rfc/${distributorId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.rfcs) {
+      console.log('✅ Distributor RFCs fetched:', data.rfcs.length);
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to fetch distributor RFCs');
+  },
+
+  assignRFCToDistributor: async (distributorId: string, request: AssignRFCRequest): Promise<AssignRFCResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`➕ Assigning RFC ${request.rfcId} to distributor ${distributorId}`);
+    const response = await fetch(`${API_BASE_URL}/admin/distributor/rfc/assign/${distributorId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ RFC assigned successfully');
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to assign RFC');
+  },
+
+  removeRFCFromDistributor: async (distributorId: string, request: RemoveRFCRequest): Promise<RemoveRFCResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log(`➖ Removing RFC ${request.rfcId} from distributor ${distributorId}`);
+    const response = await fetch(`${API_BASE_URL}/admin/distributor/rfc/remove/${distributorId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ RFC removed successfully');
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to remove RFC');
   },
 };

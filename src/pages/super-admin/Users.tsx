@@ -159,15 +159,23 @@ export function Users() {
   const columns = [
     {
       key: 'first_name',
-      header: 'Name',
-      render: ( row: UserData) => (
-        <div className="flex items-center gap-2">
+      header: 'First Name',
+      render: (value: string, row: UserData) => (
+        <button
+          onClick={() => handleOpenDialog(row)}
+          className="flex items-center gap-2 text-left hover:text-blue-600 transition-colors"
+        >
           <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
             <UserIcon className="h-4 w-4 text-blue-600" />
           </div>
-          <span className="font-medium">{`${row.first_name} ${row.last_name}`}</span>
-        </div>
+          <span className="font-medium">{value}</span>
+        </button>
       ),
+    },
+    {
+      key: 'last_name',
+      header: 'Last Name',
+      render: (value: string) => <span className="font-medium">{value}</span>,
     },
     {
       key: 'username',

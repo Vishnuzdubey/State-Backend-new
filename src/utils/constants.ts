@@ -27,7 +27,7 @@ export const SIDEBAR_MENU = {
     { label: 'Distributors', path: '/super-admin/distributors', icon: 'Truck' },
     { label: 'RFCs', path: '/super-admin/rfcs', icon: 'Radio' },
     { label: 'Device Type', path: '/super-admin/devices', icon: 'Cpu' },
-    { label: 'Plans', path: '/super-admin/plans', icon: 'CreditCard' },
+    // { label: 'Plans', path: '/super-admin/plans', icon: 'CreditCard' },
     { label: 'User Management', path: '/super-admin/users', icon: 'Users' },
     // { label: 'Masters', path: '/super-admin/settings', icon: 'Database' },
     // { label: 'Reports', path: '/super-admin/settings', icon: 'BarChart2' },

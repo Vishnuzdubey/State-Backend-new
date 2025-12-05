@@ -1,9 +1,11 @@
 ﻿import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Smartphone } from 'lucide-react';
+import { ArrowLeft, Users, Smartphone, Eye, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/common/DataTable';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { superAdminApi, type DistributorData } from '@/api/superAdmin';
 
@@ -13,10 +15,17 @@ export function DistributorDetails() {
   const [distributorData, setDistributorData] = useState<DistributorData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [rfcs, setRfcs] = useState<any[]>([]);
+  const [availableRFCs, setAvailableRFCs] = useState<any[]>([]);
+  const [loadingRFCs, setLoadingRFCs] = useState(false);
+  const [showAssignRFC, setShowAssignRFC] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchDistributorDetails();
+      fetchDistributorRFCs();
+      fetchAvailableRFCs();
     }
   }, [id]);
 
@@ -42,7 +51,60 @@ export function DistributorDetails() {
     } finally {
       setLoading(false);
     }
-  };  // Mock user details
+  };
+
+  const fetchDistributorRFCs = async () => {
+    if (!id) return;
+    
+    try {
+      setLoadingRFCs(true);
+      const response = await superAdminApi.getDistributorRFCs(id);
+      setRfcs(response.rfcs);
+    } catch (err: any) {
+      console.error('Failed to fetch distributor RFCs:', err);
+    } finally {
+      setLoadingRFCs(false);
+    }
+  };
+
+  const fetchAvailableRFCs = async () => {
+    try {
+      const response = await superAdminApi.getRFCs({ page: 1, limit: 100, search: '' });
+      setAvailableRFCs(response.rfcs);
+    } catch (err: any) {
+      console.error('Failed to fetch available RFCs:', err);
+    }
+  };
+
+  const handleAssignRFC = async (rfcId: string) => {
+    if (!id) return;
+    
+    try {
+      setError(null);
+      setSuccess(null);
+      await superAdminApi.assignRFCToDistributor(id, { rfcId });
+      setSuccess('RFC assigned successfully');
+      await fetchDistributorRFCs();
+    } catch (err: any) {
+      setError(err.message || 'Failed to assign RFC');
+    }
+  };
+
+  const handleRemoveRFC = async (rfcId: string) => {
+    if (!id) return;
+    
+    try {
+      setError(null);
+      setSuccess(null);
+      await superAdminApi.removeRFCFromDistributor(id, { rfcId });
+      setSuccess('RFC removed successfully');
+      await fetchDistributorRFCs();
+    } catch (err: any) {
+      setError(err.message || 'Failed to remove RFC');
+    }
+  };
+
+  // Mock user details
   const userDetails = [
     {
       id: 1,
@@ -142,6 +204,34 @@ export function DistributorDetails() {
     }
   ];
 
+  // RFC columns and actions
+  const rfcColumns = [
+    { 
+      key: 'name', 
+      header: 'Name',
+      render: (value: string) => <span className="font-medium">{value || 'N/A'}</span>
+    },
+    { key: 'email', header: 'Email' },
+    { 
+      key: 'createdAt', 
+      header: 'Created Date',
+      render: (value: string) => new Date(value).toLocaleDateString()
+    },
+  ];
+
+  const rfcActions = [
+    {
+      label: 'Remove',
+      onClick: (row: any) => handleRemoveRFC(row.id),
+      variant: 'destructive' as const
+    },
+    {
+      label: 'View',
+      onClick: (row: any) => navigate(`/super-admin/rfcs/${row.id}`),
+      icon: Eye
+    }
+  ];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -175,6 +265,19 @@ export function DistributorDetails() {
 
   return (
     <div className="space-y-6 w-full">
+      {/* Status Alerts */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {success && (
+        <Alert className="bg-green-50 border-green-200">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">{success}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Header with Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -255,7 +358,7 @@ export function DistributorDetails() {
       </Card>
 
       {/* Distributor User Details */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
@@ -270,21 +373,79 @@ export function DistributorDetails() {
             pagination={false}
           />
         </CardContent>
-      </Card>
+      </Card> */}
 
-      {/* Distributor Device Details */}
+      {/* Associated RFCs */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" />
-            Distributor Device Details
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Associated RFCs ({rfcs.length})
+            </CardTitle>
+            <Button
+              onClick={() => setShowAssignRFC(!showAssignRFC)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Assign RFC
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-12 text-gray-500">
-            <Smartphone className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg font-medium">No Device Details</p>
-            <p className="text-sm">No devices are currently assigned to this distributor</p>
+          <div className="space-y-4">
+            {/* RFC Assignment Panel */}
+            {showAssignRFC && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <h4 className="text-sm font-medium mb-3">Select RFC to Assign</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {availableRFCs
+                    .filter(rfc => !rfcs.some(assigned => assigned.id === rfc.id))
+                    .map(rfc => (
+                      <div key={rfc.id} className="flex items-center justify-between p-3 bg-white border rounded hover:border-blue-500">
+                        <div>
+                          <p className="font-medium">{rfc.name || 'Unnamed RFC'}</p>
+                          <p className="text-sm text-gray-600">{rfc.email}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            handleAssignRFC(rfc.id);
+                            setShowAssignRFC(false);
+                          }}
+                        >
+                          Assign
+                        </Button>
+                      </div>
+                    ))}
+                  {availableRFCs.filter(rfc => !rfcs.some(assigned => assigned.id === rfc.id)).length === 0 && (
+                    <p className="text-center text-gray-500 py-4">All RFCs are already assigned</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* RFC List */}
+            {loadingRFCs ? (
+              <div className="text-center py-8 text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-sm">Loading RFCs...</p>
+              </div>
+            ) : rfcs.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No RFCs assigned yet</p>
+                <p className="text-sm">Use the dropdown above to assign an RFC to this distributor</p>
+              </div>
+            ) : (
+              <DataTable
+                data={rfcs}
+                columns={rfcColumns}
+                actions={rfcActions}
+                searchable={false}
+                pagination={false}
+              />
+            )}
           </div>
         </CardContent>
       </Card>
