@@ -74,7 +74,7 @@ export function ManufacturerDetails() {
 
   const fetchManufacturerDistributors = async () => {
     if (!id) return;
-    
+
     try {
       setLoadingDistributors(true);
       const response = await superAdminApi.getManufacturerDistributors(id);
@@ -97,7 +97,7 @@ export function ManufacturerDetails() {
 
   const fetchAllRFCs = async () => {
     if (!distributors.length) return;
-    
+
     try {
       setLoadingRFCs(true);
       const rfcPromises = distributors.map(async (distributor) => {
@@ -113,7 +113,7 @@ export function ManufacturerDetails() {
           return [];
         }
       });
-      
+
       const rfcArrays = await Promise.all(rfcPromises);
       const allRFCsList = rfcArrays.flat();
       setAllRFCs(allRFCsList);
@@ -126,7 +126,7 @@ export function ManufacturerDetails() {
 
   const handleAssignDistributor = async (distributorId: string) => {
     if (!id) return;
-    
+
     try {
       setError(null);
       await superAdminApi.assignDistributorToManufacturer(id, { distributorId });
@@ -139,7 +139,7 @@ export function ManufacturerDetails() {
 
   const handleRemoveDistributor = async (distributorId: string) => {
     if (!id) return;
-    
+
     try {
       setError(null);
       await superAdminApi.removeDistributorFromManufacturer(id, { distributorId });
@@ -276,14 +276,14 @@ export function ManufacturerDetails() {
   ];
 
   const distributorColumns = [
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       header: 'Name',
       render: (value: string) => <span className="font-medium">{value || 'N/A'}</span>
     },
     { key: 'email', header: 'Email' },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       header: 'Created Date',
       render: (value: string) => new Date(value).toLocaleDateString()
     },
@@ -303,19 +303,19 @@ export function ManufacturerDetails() {
   ];
 
   const rfcColumns = [
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       header: 'RFC Name',
       render: (value: string) => <span className="font-medium">{value || 'N/A'}</span>
     },
     { key: 'email', header: 'Email' },
-    { 
-      key: 'distributorName', 
+    {
+      key: 'distributorName',
       header: 'Distributor',
       render: (value: string) => <span className="text-blue-600">{value}</span>
     },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       header: 'Created Date',
       render: (value: string) => new Date(value).toLocaleDateString()
     },
@@ -369,19 +369,19 @@ export function ManufacturerDetails() {
 
       {/* Navigation Tabs */}
       <div className="flex gap-4 border-b">
-        <button 
+        <button
           className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
           onClick={() => setActiveTab('details')}
         >
           All Details
         </button>
-        <button 
+        <button
           className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'account' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
           onClick={() => setActiveTab('account')}
         >
           Account
         </button>
-        <button 
+        <button
           className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'distributors' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
           onClick={() => {
             setActiveTab('distributors');
@@ -390,7 +390,7 @@ export function ManufacturerDetails() {
         >
           Distributors
         </button>
-        <button 
+        <button
           className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'rfcs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
           onClick={() => {
             setActiveTab('rfcs');
@@ -399,7 +399,7 @@ export function ManufacturerDetails() {
         >
           RFCs
         </button>
-        <button 
+        <button
           className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'devices' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
           onClick={() => setActiveTab('devices')}
         >
@@ -423,228 +423,228 @@ export function ManufacturerDetails() {
       {/* All Details Tab */}
       {activeTab === 'details' && (
         <>
-      {/* Status and Actions */}
-      <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-        <div className="flex items-center gap-4">
-          <span className="text-sm font-medium">Current Status:</span>
-          <Badge
-            className={
-              manufacturer.status === 'APPROVED' ? 'bg-green-100 text-green-800 border-green-300' :
-                manufacturer.status === 'ACKNOWLEDGED' ? 'bg-blue-100 text-blue-800 border-blue-300' :
-                  'bg-yellow-100 text-yellow-800 border-yellow-300'
-            }
-          >
-            {manufacturer.status}
-          </Badge>
-          <span className="text-sm font-medium">Documents:</span>
-          <Badge className={allDocumentsUploaded ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}>
-            {allDocumentsUploaded ? 'All Uploaded' : `${documents.filter(d => d.status === 'Uploaded').length}/${documents.length} Uploaded`}
-          </Badge>
-        </div>
-        <div className="flex gap-2">
-          {manufacturer.status === 'PENDING' && (
-            <Button
-              onClick={() => setShowAcknowledgeModal(true)}
-              className="bg-blue-600"
-              disabled={isUpdating}
-            >
-              Acknowledge & Set Password
-            </Button>
-          )}
-          {canApprove && (
-            <Button
-              onClick={() => {
-                // Use existing password or prompt for it
-                const pwd = manufacturer.password || prompt('Enter password for approval (min 6 characters):');
-                if (pwd && pwd.length >= 6) {
-                  handleUpdateStatus('APPROVED', pwd);
-                } else {
-                  setError('Valid password required for approval');
+          {/* Status and Actions */}
+          <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium">Current Status:</span>
+              <Badge
+                className={
+                  manufacturer.status === 'APPROVED' ? 'bg-green-100 text-green-800 border-green-300' :
+                    manufacturer.status === 'ACKNOWLEDGED' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                      'bg-yellow-100 text-yellow-800 border-yellow-300'
                 }
-              }}
-              className="bg-green-600"
-              disabled={isUpdating}
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Approve Manufacturer
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {/* Acknowledge Modal */}
-      {showAcknowledgeModal && (
-        <Card className="border-2 border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle>Acknowledge Manufacturer</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-700">
-              Set a password for this manufacturer. They will use this password to login and upload documents.
-            </p>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="text"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password for manufacturer"
-              />
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => handleUpdateStatus('ACKNOWLEDGED', password)}
-                disabled={!password || isUpdating}
-                className="bg-blue-600"
               >
-                {isUpdating ? 'Acknowledging...' : 'Acknowledge'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowAcknowledgeModal(false);
-                  setPassword('');
-                }}
-                disabled={isUpdating}
-              >
-                Cancel
-              </Button>
+                {manufacturer.status}
+              </Badge>
+              <span className="text-sm font-medium">Documents:</span>
+              <Badge className={allDocumentsUploaded ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}>
+                {allDocumentsUploaded ? 'All Uploaded' : `${documents.filter(d => d.status === 'Uploaded').length}/${documents.length} Uploaded`}
+              </Badge>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Manufacturer Basic Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-blue-600" />
-            Manufacturer Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-500">Entity Name</label>
-              <p className="text-lg font-semibold">{manufacturer.name}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">GST Number</label>
-              <p className="text-lg font-semibold">{manufacturer.gst}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">PAN Number</label>
-              <p className="text-lg font-semibold">{manufacturer.pan}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Contact Person</label>
-              <p className="text-lg">{manufacturer.fullname_user}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Email</label>
-              <p className="text-lg">{manufacturer.email}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Phone</label>
-              <p className="text-lg">{manufacturer.phone}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Address</label>
-              <p className="text-lg">{manufacturer.address}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">District</label>
-              <p className="text-lg">{manufacturer.district}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">State</label>
-              <p className="text-lg">{manufacturer.state}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Pin Code</label>
-              <p className="text-lg">{manufacturer.pincode}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500">Created At</label>
-              <p className="text-lg">{new Date(manufacturer.createdAt).toLocaleDateString()}</p>
+            <div className="flex gap-2">
+              {manufacturer.status === 'PENDING' && (
+                <Button
+                  onClick={() => setShowAcknowledgeModal(true)}
+                  className="bg-blue-600"
+                  disabled={isUpdating}
+                >
+                  Acknowledge & Set Password
+                </Button>
+              )}
+              {canApprove && (
+                <Button
+                  onClick={() => {
+                    // Use existing password or prompt for it
+                    const pwd = manufacturer.password || prompt('Enter password for approval (min 6 characters):');
+                    if (pwd && pwd.length >= 6) {
+                      handleUpdateStatus('APPROVED', pwd);
+                    } else {
+                      setError('Valid password required for approval');
+                    }
+                  }}
+                  className="bg-green-600"
+                  disabled={isUpdating}
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Approve Manufacturer
+                </Button>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Manufacturer User Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-blue-600" />
-            Manufacturer User Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <DataTable
-            data={userDetails}
-            columns={userColumns}
-            actions={userActions}
-            searchable={false}
-            pagination={false}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Document Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            Document Details
-            {allDocumentsUploaded && (
-              <Badge className="ml-2 bg-green-100 text-green-800">All Documents Uploaded</Badge>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {documents.map((doc, index) => (
-              <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-sm">{doc.name}</h4>
-                  <Badge
-                    variant="outline"
-                    className={doc.status === 'Uploaded' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-gray-100 text-gray-800 border-gray-300'}
-                  >
-                    {doc.status}
-                  </Badge>
+          {/* Acknowledge Modal */}
+          {showAcknowledgeModal && (
+            <Card className="border-2 border-blue-200 bg-blue-50">
+              <CardHeader>
+                <CardTitle>Acknowledge Manufacturer</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-gray-700">
+                  Set a password for this manufacturer. They will use this password to login and upload documents.
+                </p>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="text"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password for manufacturer"
+                  />
                 </div>
-                {doc.url ? (
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => handleUpdateStatus('ACKNOWLEDGED', password)}
+                    disabled={!password || isUpdating}
+                    className="bg-blue-600"
+                  >
+                    {isUpdating ? 'Acknowledging...' : 'Acknowledge'}
+                  </Button>
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="w-full mt-3"
-                    onClick={() => window.open(doc.url!, '_blank')}
+                    onClick={() => {
+                      setShowAcknowledgeModal(false);
+                      setPassword('');
+                    }}
+                    disabled={isUpdating}
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Document
+                    Cancel
                   </Button>
-                ) : (
-                  <Button variant="outline" size="sm" className="w-full mt-3" disabled>
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Not Uploaded
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {!allDocumentsUploaded && manufacturer.status === 'ACKNOWLEDGED' && (
-            <Alert className="mt-4 bg-orange-50 border-orange-200">
-              <AlertDescription className="text-orange-800">
-                Manufacturer needs to upload all documents before approval can be granted.
-              </AlertDescription>
-            </Alert>
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
+
+          {/* Manufacturer Basic Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-blue-600" />
+                Manufacturer Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Entity Name</label>
+                  <p className="text-lg font-semibold">{manufacturer.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">GST Number</label>
+                  <p className="text-lg font-semibold">{manufacturer.gst}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">PAN Number</label>
+                  <p className="text-lg font-semibold">{manufacturer.pan}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Contact Person</label>
+                  <p className="text-lg">{manufacturer.fullname_user}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Email</label>
+                  <p className="text-lg">{manufacturer.email}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Phone</label>
+                  <p className="text-lg">{manufacturer.phone}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Address</label>
+                  <p className="text-lg">{manufacturer.address}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">District</label>
+                  <p className="text-lg">{manufacturer.district}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">State</label>
+                  <p className="text-lg">{manufacturer.state}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Pin Code</label>
+                  <p className="text-lg">{manufacturer.pincode}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Created At</label>
+                  <p className="text-lg">{new Date(manufacturer.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Manufacturer User Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-600" />
+                Manufacturer User Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <DataTable
+                data={userDetails}
+                columns={userColumns}
+                actions={userActions}
+                searchable={false}
+                pagination={false}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Document Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-blue-600" />
+                Document Details
+                {allDocumentsUploaded && (
+                  <Badge className="ml-2 bg-green-100 text-green-800">All Documents Uploaded</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {documents.map((doc, index) => (
+                  <div key={index} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">{doc.name}</h4>
+                      <Badge
+                        variant="outline"
+                        className={doc.status === 'Uploaded' ? 'bg-green-100 text-green-800 border-green-300' : 'bg-gray-100 text-gray-800 border-gray-300'}
+                      >
+                        {doc.status}
+                      </Badge>
+                    </div>
+                    {doc.url ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full mt-3"
+                        onClick={() => window.open(doc.url!, '_blank')}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Document
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="sm" className="w-full mt-3" disabled>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Not Uploaded
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {!allDocumentsUploaded && manufacturer.status === 'ACKNOWLEDGED' && (
+                <Alert className="mt-4 bg-orange-50 border-orange-200">
+                  <AlertDescription className="text-orange-800">
+                    Manufacturer needs to upload all documents before approval can be granted.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
 
         </>
       )}
@@ -747,7 +747,7 @@ export function ManufacturerDetails() {
                 <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p className="text-lg font-medium">No RFCs found</p>
                 <p className="text-sm">
-                  {distributors.length === 0 
+                  {distributors.length === 0
                     ? 'No distributors assigned to this manufacturer yet'
                     : 'None of the assigned distributors have RFCs'}
                 </p>

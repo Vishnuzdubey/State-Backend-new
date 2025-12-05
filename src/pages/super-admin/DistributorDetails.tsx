@@ -55,7 +55,7 @@ export function DistributorDetails() {
 
   const fetchDistributorRFCs = async () => {
     if (!id) return;
-    
+
     try {
       setLoadingRFCs(true);
       const response = await superAdminApi.getDistributorRFCs(id);
@@ -78,7 +78,7 @@ export function DistributorDetails() {
 
   const handleAssignRFC = async (rfcId: string) => {
     if (!id) return;
-    
+
     try {
       setError(null);
       setSuccess(null);
@@ -92,7 +92,7 @@ export function DistributorDetails() {
 
   const handleRemoveRFC = async (rfcId: string) => {
     if (!id) return;
-    
+
     try {
       setError(null);
       setSuccess(null);
@@ -206,14 +206,14 @@ export function DistributorDetails() {
 
   // RFC columns and actions
   const rfcColumns = [
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       header: 'Name',
       render: (value: string) => <span className="font-medium">{value || 'N/A'}</span>
     },
     { key: 'email', header: 'Email' },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       header: 'Created Date',
       render: (value: string) => new Date(value).toLocaleDateString()
     },
