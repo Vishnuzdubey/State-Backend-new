@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Download, FileText, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DataTable } from '@/components/common/DataTable';
@@ -37,62 +37,62 @@ export function Distributors() {
     fetchDistributors();
   };
 
-  const [distributorsOld] = useState<any[]>([
-    {
-      id: '1',
-      entityName: 'R K Enterprises',
-      code: 'RKE',
-      address: 'B-704, Balaji Complex, Plot 12 & 13, Sector 8E, Kalamboli, Navi Mumbai',
-      district: 'Raigad',
-      pinCode: '410218',
-      manufacturer: 'Watsoo Express',
-    },
-    {
-      id: '2',
-      entityName: 'Rohit Trading Company',
-      code: 'RTC',
-      address: 'Lodha Bellissimo, N.M. Joshi Marg, Mahalaxmi',
-      district: 'Mumbai',
-      pinCode: '400009',
-      manufacturer: 'Ecogas Impex',
-    },
-    {
-      id: '3',
-      entityName: 'Ashirwad Traders',
-      code: 'AST',
-      address: 'Shop No 3, Gomaji Kasturi Chs, Sec 5, Ulwe',
-      district: 'Navi Mumbai',
-      pinCode: '410206',
-      manufacturer: 'TechFlow Solutions',
-    },
-    {
-      id: '4',
-      entityName: 'Star Auto Electric Company',
-      code: 'SAEC',
-      address: 'B 30/2 T/F, NEAR SAI BABA MANDIR, Jhilmil Industrial Area',
-      district: 'Shahdara',
-      pinCode: '110095',
-      manufacturer: 'Watsoo Express',
-    },
-    {
-      id: '5',
-      entityName: 'Bharat Trading Company',
-      code: 'BTC',
-      address: 'Plot No. 877, In Steel Warehousing Complex, Steel Market Road, On Service Road',
-      district: 'Raigad',
-      pinCode: '410218',
-      manufacturer: 'Ecogas Impex',
-    },
-    {
-      id: '6',
-      entityName: 'Balaji Traders',
-      code: 'BJT',
-      address: 'Office No 602, NMS Titanium, Sec 15 CBD Belapur',
-      district: 'Belapur',
-      pinCode: '400614',
-      manufacturer: 'TechFlow Solutions',
-    },
-  ]);
+  // const [distributorsOld] = useState<any[]>([
+  //   {
+  //     id: '1',
+  //     entityName: 'R K Enterprises',
+  //     code: 'RKE',
+  //     address: 'B-704, Balaji Complex, Plot 12 & 13, Sector 8E, Kalamboli, Navi Mumbai',
+  //     district: 'Raigad',
+  //     pinCode: '410218',
+  //     manufacturer: 'Watsoo Express',
+  //   },
+  //   {
+  //     id: '2',
+  //     entityName: 'Rohit Trading Company',
+  //     code: 'RTC',
+  //     address: 'Lodha Bellissimo, N.M. Joshi Marg, Mahalaxmi',
+  //     district: 'Mumbai',
+  //     pinCode: '400009',
+  //     manufacturer: 'Ecogas Impex',
+  //   },
+  //   {
+  //     id: '3',
+  //     entityName: 'Ashirwad Traders',
+  //     code: 'AST',
+  //     address: 'Shop No 3, Gomaji Kasturi Chs, Sec 5, Ulwe',
+  //     district: 'Navi Mumbai',
+  //     pinCode: '410206',
+  //     manufacturer: 'TechFlow Solutions',
+  //   },
+  //   {
+  //     id: '4',
+  //     entityName: 'Star Auto Electric Company',
+  //     code: 'SAEC',
+  //     address: 'B 30/2 T/F, NEAR SAI BABA MANDIR, Jhilmil Industrial Area',
+  //     district: 'Shahdara',
+  //     pinCode: '110095',
+  //     manufacturer: 'Watsoo Express',
+  //   },
+  //   {
+  //     id: '5',
+  //     entityName: 'Bharat Trading Company',
+  //     code: 'BTC',
+  //     address: 'Plot No. 877, In Steel Warehousing Complex, Steel Market Road, On Service Road',
+  //     district: 'Raigad',
+  //     pinCode: '410218',
+  //     manufacturer: 'Ecogas Impex',
+  //   },
+  //   {
+  //     id: '6',
+  //     entityName: 'Balaji Traders',
+  //     code: 'BJT',
+  //     address: 'Office No 602, NMS Titanium, Sec 15 CBD Belapur',
+  //     district: 'Belapur',
+  //     pinCode: '400614',
+  //     manufacturer: 'TechFlow Solutions',
+  //   },
+  // ]);
 
   const columns = [
     {
@@ -126,10 +126,6 @@ export function Distributors() {
       ),
       sortable: true
     },
-  ];
-
-  const actions = [
-    { label: 'Edit', onClick: (row: any) => console.log('Edit', row) },
   ];
 
   if (loading) {

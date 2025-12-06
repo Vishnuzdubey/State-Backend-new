@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Edit, Users, Smartphone } from 'lucide-react';
+import { ArrowLeft, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { DataTable } from '@/components/common/DataTable';
 import { useNavigate, useParams } from 'react-router-dom';
 import { superAdminApi, type RFCData } from '@/api/superAdmin';
@@ -44,65 +44,65 @@ export function RFCDetails() {
       setLoading(false);
     }
   };  // Mock user details
-  const userDetails = [
-    {
-      id: 1,
-      fullName: 'Rutvi Gandhi',
-      username: 'rfclogiclab',
-      designation: 'Admin',
-      emailId: 'crmlogiclab@gmail.com',
-      contactNo: '9004754617'
-    }
-  ];
+  // const userDetails = [
+  //   {
+  //     id: 1,
+  //     fullName: 'Rutvi Gandhi',
+  //     username: 'rfclogiclab',
+  //     designation: 'Admin',
+  //     emailId: 'crmlogiclab@gmail.com',
+  //     contactNo: '9004754617'
+  //   }
+  // ];
 
   // Mock device details (empty for now)
   const deviceDetails: string | any[] = [];
 
-  const userColumns = [
-    {
-      key: 'fullName',
-      header: 'Full Name',
-      render: (value: string) => (
-        <div className="font-medium">{value}</div>
-      )
-    },
-    {
-      key: 'username',
-      header: 'Username',
-      render: (value: string) => (
-        <div className="font-mono text-sm">{value}</div>
-      )
-    },
-    {
-      key: 'designation',
-      header: 'Designation',
-      render: (value: string) => (
-        <Badge variant="outline">{value}</Badge>
-      )
-    },
-    {
-      key: 'emailId',
-      header: 'Email Id',
-      render: (value: string) => (
-        <div className="text-blue-600">{value}</div>
-      )
-    },
-    {
-      key: 'contactNo',
-      header: 'Contact No.',
-      render: (value: string) => (
-        <div className="font-mono">{value}</div>
-      )
-    }
-  ];
+  // const userColumns = [
+  //   {
+  //     key: 'fullName',
+  //     header: 'Full Name',
+  //     render: (value: string) => (
+  //       <div className="font-medium">{value}</div>
+  //     )
+  //   },
+  //   {
+  //     key: 'username',
+  //     header: 'Username',
+  //     render: (value: string) => (
+  //       <div className="font-mono text-sm">{value}</div>
+  //     )
+  //   },
+  //   {
+  //     key: 'designation',
+  //     header: 'Designation',
+  //     render: (value: string) => (
+  //       <Badge variant="outline">{value}</Badge>
+  //     )
+  //   },
+  //   {
+  //     key: 'emailId',
+  //     header: 'Email Id',
+  //     render: (value: string) => (
+  //       <div className="text-blue-600">{value}</div>
+  //     )
+  //   },
+  //   {
+  //     key: 'contactNo',
+  //     header: 'Contact No.',
+  //     render: (value: string) => (
+  //       <div className="font-mono">{value}</div>
+  //     )
+  //   }
+  // ];
 
-  const userActions = [
-    {
-      label: 'Edit',
-      onClick: (row: any) => console.log('Edit user', row),
-      icon: Edit
-    }
-  ];
+  // const userActions = [
+  //   {
+  //     label: 'Edit',
+  //     onClick: (row: any) => console.log('Edit user', row),
+  //     icon: Edit
+  //   }
+  // ];
 
   const deviceColumns = [
     { key: 'deviceId', header: 'Device ID' },

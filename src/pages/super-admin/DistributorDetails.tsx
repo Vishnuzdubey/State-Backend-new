@@ -1,8 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
-import { ArrowLeft, Users, Smartphone, Eye, Plus } from 'lucide-react';
+import { ArrowLeft, Users, Eye, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { DataTable } from '@/components/common/DataTable';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle } from 'lucide-react';
@@ -105,104 +105,104 @@ export function DistributorDetails() {
   };
 
   // Mock user details
-  const userDetails = [
-    {
-      id: 1,
-      fullName: 'Ankur Garg',
-      username: 'disbtc',
-      designation: 'Admin',
-      emailId: 'bharattradingco1091@gmail.com',
-      contactNo: '9996031091',
-      editable: true
-    },
-    {
-      id: 2,
-      fullName: 'Rutvi Gandhi',
-      username: 'disbtclogiclab',
-      designation: 'InventoryManager',
-      emailId: 'crmbhy5@gmail.com',
-      contactNo: '9152011465',
-      editable: false
-    },
-    {
-      id: 3,
-      fullName: 'Chandresh Matbar Kevat',
-      username: 'disomabtc',
-      designation: 'InventoryManager',
-      emailId: 'omautomobilepuc@gmail.com',
-      contactNo: '7506191817',
-      editable: false
-    },
-    {
-      id: 4,
-      fullName: 'Rajesh auto',
-      username: 'Disrabtc',
-      designation: 'InventoryManager',
-      emailId: 'Rajeshauto123@gmail.com',
-      contactNo: '2212122122',
-      editable: false
-    },
-    {
-      id: 5,
-      fullName: 'Atul Dhumal',
-      username: 'disrmbtc',
-      designation: 'InventoryManager',
-      emailId: 'rajemotorsfinance@gmail.com',
-      contactNo: 'admin',
-      editable: false
-    }
-  ];
+  // const userDetails = [
+  //   {
+  //     id: 1,
+  //     fullName: 'Ankur Garg',
+  //     username: 'disbtc',
+  //     designation: 'Admin',
+  //     emailId: 'bharattradingco1091@gmail.com',
+  //     contactNo: '9996031091',
+  //     editable: true
+  //   },
+  //   {
+  //     id: 2,
+  //     fullName: 'Rutvi Gandhi',
+  //     username: 'disbtclogiclab',
+  //     designation: 'InventoryManager',
+  //     emailId: 'crmbhy5@gmail.com',
+  //     contactNo: '9152011465',
+  //     editable: false
+  //   },
+  //   {
+  //     id: 3,
+  //     fullName: 'Chandresh Matbar Kevat',
+  //     username: 'disomabtc',
+  //     designation: 'InventoryManager',
+  //     emailId: 'omautomobilepuc@gmail.com',
+  //     contactNo: '7506191817',
+  //     editable: false
+  //   },
+  //   {
+  //     id: 4,
+  //     fullName: 'Rajesh auto',
+  //     username: 'Disrabtc',
+  //     designation: 'InventoryManager',
+  //     emailId: 'Rajeshauto123@gmail.com',
+  //     contactNo: '2212122122',
+  //     editable: false
+  //   },
+  //   {
+  //     id: 5,
+  //     fullName: 'Atul Dhumal',
+  //     username: 'disrmbtc',
+  //     designation: 'InventoryManager',
+  //     emailId: 'rajemotorsfinance@gmail.com',
+  //     contactNo: 'admin',
+  //     editable: false
+  //   }
+  // ];
 
-  const userColumns = [
-    {
-      key: 'fullName',
-      header: 'Full Name',
-      render: (value: string) => (
-        <div className="font-medium">{value}</div>
-      )
-    },
-    {
-      key: 'username',
-      header: 'Username',
-      render: (value: string) => (
-        <div className="font-mono text-sm">{value}</div>
-      )
-    },
-    {
-      key: 'designation',
-      header: 'Designation',
-      render: (value: string) => (
-        <Badge variant="outline">{value}</Badge>
-      )
-    },
-    {
-      key: 'emailId',
-      header: 'Email Id',
-      render: (value: string) => (
-        <div className="text-blue-600">{value}</div>
-      )
-    },
-    {
-      key: 'contactNo',
-      header: 'Contact No.',
-      render: (value: string) => (
-        <div className="font-mono">{value}</div>
-      )
-    },
-    {
-      key: 'editable',
-      header: 'Action',
-      render: (value: boolean) => (
-        value ? (
-          <Button size="sm" variant="outline">
-            Edit
-          </Button>
-        ) : (
-          <span className="text-gray-500 text-sm">No Editable</span>
-        )
-      )
-    }
-  ];
+  // const userColumns = [
+  //   {
+  //     key: 'fullName',
+  //     header: 'Full Name',
+  //     render: (value: string) => (
+  //       <div className="font-medium">{value}</div>
+  //     )
+  //   },
+  //   {
+  //     key: 'username',
+  //     header: 'Username',
+  //     render: (value: string) => (
+  //       <div className="font-mono text-sm">{value}</div>
+  //     )
+  //   },
+  //   {
+  //     key: 'designation',
+  //     header: 'Designation',
+  //     render: (value: string) => (
+  //       <Badge variant="outline">{value}</Badge>
+  //     )
+  //   },
+  //   {
+  //     key: 'emailId',
+  //     header: 'Email Id',
+  //     render: (value: string) => (
+  //       <div className="text-blue-600">{value}</div>
+  //     )
+  //   },
+  //   {
+  //     key: 'contactNo',
+  //     header: 'Contact No.',
+  //     render: (value: string) => (
+  //       <div className="font-mono">{value}</div>
+  //     )
+  //   },
+  //   {
+  //     key: 'editable',
+  //     header: 'Action',
+  //     render: (value: boolean) => (
+  //       value ? (
+  //         <Button size="sm" variant="outline">
+  //           Edit
+  //         </Button>
+  //       ) : (
+  //         <span className="text-gray-500 text-sm">No Editable</span>
+  //       )
+  //     )
+  //   }
+  // ];
 
   // RFC columns and actions
   const rfcColumns = [

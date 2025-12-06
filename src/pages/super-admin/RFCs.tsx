@@ -37,53 +37,53 @@ export function RFCs() {
     fetchRFCs();
   };
 
-  const [rfcsOld] = useState([
-    {
-      id: '1',
-      name: 'FleetX Solutions',
-      code: 'RFCFX01',
-      address: 'Plot 12, Tech Park, Sector 21',
-      district: 'Noida',
-      pinCode: '201301',
-      manufacturer: 'Watsoo Express',
-    },
-    {
-      id: '2',
-      name: 'Urban Mobility Hub',
-      code: 'RFCUMH02',
-      address: '45, Main Road, Indira Nagar',
-      district: 'Lucknow',
-      pinCode: '226016',
-      manufacturer: 'Ecogas Impex',
-    },
-    {
-      id: '3',
-      name: 'Metro Fleet Services',
-      code: 'RFCMFS03',
-      address: '88, MG Road, Near Metro Station',
-      district: 'Bangalore',
-      pinCode: '560001',
-      manufacturer: 'TechFlow Solutions',
-    },
-    {
-      id: '4',
-      name: 'Rapid Transport Control',
-      code: 'RFCRTC04',
-      address: '7, Expressway, Sector 62',
-      district: 'Gurgaon',
-      pinCode: '122001',
-      manufacturer: 'Watsoo Express',
-    },
-    {
-      id: '5',
-      name: 'Green Wheels Authority',
-      code: 'RFCGWA05',
-      address: 'Plot 5, Green Park',
-      district: 'Pune',
-      pinCode: '411001',
-      manufacturer: 'Ecogas Impex',
-    },
-  ]);
+  // const [rfcsOld] = useState([
+  //   {
+  //     id: '1',
+  //     name: 'FleetX Solutions',
+  //     code: 'RFCFX01',
+  //     address: 'Plot 12, Tech Park, Sector 21',
+  //     district: 'Noida',
+  //     pinCode: '201301',
+  //     manufacturer: 'Watsoo Express',
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Urban Mobility Hub',
+  //     code: 'RFCUMH02',
+  //     address: '45, Main Road, Indira Nagar',
+  //     district: 'Lucknow',
+  //     pinCode: '226016',
+  //     manufacturer: 'Ecogas Impex',
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'Metro Fleet Services',
+  //     code: 'RFCMFS03',
+  //     address: '88, MG Road, Near Metro Station',
+  //     district: 'Bangalore',
+  //     pinCode: '560001',
+  //     manufacturer: 'TechFlow Solutions',
+  //   },
+  //   {
+  //     id: '4',
+  //     name: 'Rapid Transport Control',
+  //     code: 'RFCRTC04',
+  //     address: '7, Expressway, Sector 62',
+  //     district: 'Gurgaon',
+  //     pinCode: '122001',
+  //     manufacturer: 'Watsoo Express',
+  //   },
+  //   {
+  //     id: '5',
+  //     name: 'Green Wheels Authority',
+  //     code: 'RFCGWA05',
+  //     address: 'Plot 5, Green Park',
+  //     district: 'Pune',
+  //     pinCode: '411001',
+  //     manufacturer: 'Ecogas Impex',
+  //   },
+  // ]);
 
   const columns = [
     {
