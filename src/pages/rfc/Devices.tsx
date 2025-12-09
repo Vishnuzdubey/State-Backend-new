@@ -82,6 +82,17 @@ export function RFCDevices() {
       ),
     },
     {
+      key: 'rfc_entity_id',
+      header: 'Status',
+      render: (_value: string | null, row: RFCDevice) => (
+        row.distributor_entity_id || row.rfc_entity_id ? (
+          <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
+        ) : (
+          <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>
+        )
+      ),
+    },
+    {
       key: 'createdAt',
       header: 'Created',
       render: (value: string) => (

@@ -1,49 +1,104 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Eye, RefreshCw } from 'lucide-react';
+import { manufacturerApi, type InventoryItem } from '@/api/manufacturer';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
-type RFCItem = {
-  id: number;
+type RFC = {
+  id: string;
   name: string;
-  code: string;
-  address: string;
-  district: string;
-  pincode: string;
+  email: string;
+  createdAt: string;
 };
 
-const SAMPLE_RFC: RFCItem[] = [
-  { id: 1, name: 'Logic Labs Infotronics Limited', code: 'RFCLOGIC', address: '002, Shree ji Krupa Bldg, Cross Garden Rd, behind Dena Bank, Bhayandar', district: 'Thane', pincode: '401101' },
-  { id: 2, name: 'Hira Auto Garage', code: 'RFCHAG', address: 'PLOT NO. 29, TATA POWER COMPANY, VICCO NAKA, NEAR MANPADA POLICE STATION, DOMBIVALI EAST', district: 'DOMBIVALI EAST', pincode: '421201' },
-  { id: 3, name: 'Siddnath Industries', code: 'RFCSI', address: 'G.NO-367, WARD NO.24/ 232 -C, NR.SINCHAN BHAWAN, AURANGBAD BYPASS ROAD', district: 'Osmanabad State', pincode: '413501' },
-  { id: 4, name: 'Protech india', code: 'RFCPI', address: 'SHOP NO B 2, PRIVIA BUSINESS CENTER, NEAR NEW PCMC RTO OFFICE, SECTOR 6', district: 'Pune', pincode: '412105' },
-  { id: 5, name: 'SK Fuel', code: 'RFCSKF', address: 'Shop No- 2, Sai Baba Nagar, Vaman Bhoir Road, Dahisar West,', district: 'Dahisar', pincode: '400068' },
-  { id: 6, name: 'Hindustan Auto Gas', code: 'RFCHAGA', address: '10 NUMBER PULIYA, Keshaw Complex, Kamptee Rd, near KADBI CHOWK, Dobi Nagar', district: 'Nagpur', pincode: '440017' },
-  { id: 7, name: 'Sharvil Enterprises', code: 'RFCSE', address: 'INDIRA NAGAR NO 1, 5, Dattatray Chawl, Golibar Road, KM Two Wheeler Garage', district: 'Ghatkopar', pincode: '400086' },
-  { id: 8, name: 'OM AUTOMOBILES', code: 'RFCOMA', address: 'Shop No.12, Plot No.56/57, Sector-19C, Vashi', district: 'Navi Mumbai', pincode: '400705' },
-  { id: 9, name: 'GLOBAL MOTORS', code: 'RFCGM', address: '138/2 VEDANT NAGAR, AKKALKOT ROAD,', district: 'SOLAPUR', pincode: '413006' },
-  { id: 10, name: 'SOHAIL AUTO', code: 'RFCSA', address: 'Hiraram Complex, Bhangsimata Road, New RTO Office, Karodi, Chh Sambhaji Nagar', district: 'Aurangabad', pincode: '413113' }
-];
-
 export default function ManufacturerRFCs() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [rfcs, setRfcs] = useState<RFC[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState<string>('');
-  // Total count requested as 55 in the sample
-  const [totalCount] = useState<number>(55);
+  const [selectedRFC, setSelectedRFC] = useState<RFC | null>(null);
+  const [isDevicesDialogOpen, setIsDevicesDialogOpen] = useState(false);
+  const [rfcDevices, setRfcDevices] = useState<InventoryItem[]>([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return SAMPLE_RFC;
-    return SAMPLE_RFC.filter(r =>
+    if (!q) return rfcs;
+    return rfcs.filter(r =>
       r.name.toLowerCase().includes(q) ||
-      r.code.toLowerCase().includes(q) ||
-      r.district.toLowerCase().includes(q)
+      r.email.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [query, rfcs]);
 
-  const downloadCSV = (rows: RFCItem[]) => {
-    const headers = ['Entity Name','Entity Code','Address','District','Pin Code'];
-    const body = rows.map(r => [r.name, r.code, r.address, r.district, r.pincode]);
-    const csv = [headers, ...body].map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
+  useEffect(() => {
+    fetchRFCs();
+  }, []);
+
+  // Handle navigation from DeviceDetails with viewRFCId state
+  useEffect(() => {
+    if (location.state?.viewRFCId && rfcs.length > 0) {
+      const rfcToView = rfcs.find(r => r.id === location.state.viewRFCId);
+      if (rfcToView) {
+        handleViewDevices(rfcToView);
+        // Clear the state to prevent re-opening on page reload
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state?.viewRFCId, rfcs]);
+
+  const fetchRFCs = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await manufacturerApi.getRFCs();
+      setRfcs(response.rfcs || []);
+    } catch (err) {
+      console.error('Failed to fetch RFCs:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load RFCs');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRFCDevices = async (rfcId: string) => {
+    try {
+      setLoadingDevices(true);
+      const response = await manufacturerApi.getInventoryByQuery({
+        page: 1,
+        limit: 100,
+        search: '',
+        rfcId,
+      });
+      setRfcDevices(response.data || []);
+    } catch (err) {
+      console.error('Failed to fetch RFC devices:', err);
+      setRfcDevices([]);
+    } finally {
+      setLoadingDevices(false);
+    }
+  };
+
+  const handleViewDevices = (rfc: RFC) => {
+    setSelectedRFC(rfc);
+    setIsDevicesDialogOpen(true);
+    fetchRFCDevices(rfc.id);
+  };
+
+  const downloadCSV = (rows: RFC[]) => {
+    const headers = ['Name', 'Email', 'Created Date'];
+    const body = rows.map(r => [r.name, r.email, new Date(r.createdAt).toLocaleDateString()]);
+    const csv = [headers, ...body].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -53,9 +108,9 @@ export default function ManufacturerRFCs() {
     URL.revokeObjectURL(url);
   };
 
-  const downloadExcel = (rows: RFCItem[]) => {
-    const headers = ['Entity Name','Entity Code','Address','District','Pin Code'];
-    const body = rows.map(r => [r.name, r.code, r.address, r.district, r.pincode]);
+  const downloadExcel = (rows: RFC[]) => {
+    const headers = ['Name', 'Email', 'Created Date'];
+    const body = rows.map(r => [r.name, r.email, new Date(r.createdAt).toLocaleDateString()]);
     const csv = [headers, ...body].map(r => r.join('\t')).join('\n');
     const blob = new Blob([csv], { type: 'application/vnd.ms-excel' });
     const url = URL.createObjectURL(blob);
@@ -66,23 +121,29 @@ export default function ManufacturerRFCs() {
     URL.revokeObjectURL(url);
   };
 
-  const printPDF = (rows: RFCItem[]) => {
+  const printPDF = (rows: RFC[]) => {
     const win = window.open('', '_blank');
     if (!win) return;
     const tableHtml = `
       <html>
         <head>
           <title>RFC List</title>
-          <style>table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:8px}</style>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            td, th { border: 1px solid #ddd; padding: 10px; font-size: 12px; text-align: left; }
+            th { background-color: #f0f0f0; font-weight: bold; }
+            h1 { text-align: center; margin-bottom: 20px; }
+          </style>
         </head>
         <body>
           <h1>RFC List</h1>
           <table>
             <thead>
-              <tr>${['Entity Name','Entity Code','Address','District','Pin Code'].map(h=>`<th>${h}</th>`).join('')}</tr>
+              <tr><th>Name</th><th>Email</th><th>Created Date</th></tr>
             </thead>
             <tbody>
-              ${rows.map(r => `<tr><td>${r.name}</td><td>${r.code}</td><td>${r.address}</td><td>${r.district}</td><td>${r.pincode}</td></tr>`).join('')}
+              ${rows.map(r => `<tr><td>${r.name}</td><td>${r.email}</td><td>${new Date(r.createdAt).toLocaleDateString()}</td></tr>`).join('')}
             </tbody>
           </table>
         </body>
@@ -93,52 +154,163 @@ export default function ManufacturerRFCs() {
     win.print();
   };
 
+  const handleDeviceView = (device: InventoryItem) => {
+    navigate('/manufacturer/inventory/' + device.id, { state: { device } });
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">RFC List</h1>
-        <div className="text-sm text-gray-600">Total Count: {totalCount}</div>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">RFC List</h1>
+          <p className="text-gray-600">Manage and view RFC entities</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => fetchRFCs()}>
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+          {error}
+        </div>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle>RFCs</CardTitle>
+          <CardTitle className="text-lg">RFC Entities</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2 mb-4">
-            <Input placeholder="Search by name, code or district" value={query} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)} />
-            <Button onClick={() => setQuery('')}>Search</Button>
-            <Button onClick={() => downloadCSV(filtered)}>CSV</Button>
-            <Button onClick={() => downloadExcel(filtered)}>Excel</Button>
-            <Button onClick={() => printPDF(filtered)}>PDF</Button>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Input
+              placeholder="Search by name or email..."
+              value={query}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+              className="flex-1"
+            />
+            <Button variant="outline" size="sm" onClick={() => downloadCSV(filtered)}>
+              CSV
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => downloadExcel(filtered)}>
+              Excel
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => printPDF(filtered)}>
+              PDF
+            </Button>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left">Entity Name</th>
-                  <th className="px-4 py-2 text-left">Entity Code</th>
-                  <th className="px-4 py-2 text-left">Address</th>
-                  <th className="px-4 py-2 text-left">District</th>
-                  <th className="px-4 py-2 text-left">Pin Code</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filtered.map(r => (
-                  <tr key={r.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 align-top">{r.name}</td>
-                    <td className="px-4 py-2 align-top font-mono">{r.code}</td>
-                    <td className="px-4 py-2 align-top">{r.address}</td>
-                    <td className="px-4 py-2 align-top">{r.district}</td>
-                    <td className="px-4 py-2 align-top">{r.pincode}</td>
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading RFCs...</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No RFCs found</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-semibold">Name</th>
+                    <th className="px-4 py-2 text-left font-semibold">Email</th>
+                    <th className="px-4 py-2 text-left font-semibold">Created Date</th>
+                    <th className="px-4 py-2 text-left font-semibold">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filtered.map(rfc => (
+                    <tr key={rfc.id} className="hover:bg-gray-50 transition">
+                      <td className="px-4 py-3 font-medium text-gray-900">{rfc.name}</td>
+                      <td className="px-4 py-3 text-gray-700">{rfc.email}</td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {new Date(rfc.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewDevices(rfc)}
+                          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Devices
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      <Dialog open={isDevicesDialogOpen} onOpenChange={setIsDevicesDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Devices for RFC: {selectedRFC?.name}
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingDevices ? (
+            <div className="text-center py-8 text-gray-500">Loading devices...</div>
+          ) : rfcDevices.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No devices found for this RFC</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-semibold">IMEI</th>
+                    <th className="px-4 py-2 text-left font-semibold">Serial</th>
+                    <th className="px-4 py-2 text-left font-semibold">Model</th>
+                    <th className="px-4 py-2 text-left font-semibold">Certificate</th>
+                    <th className="px-4 py-2 text-left font-semibold">Status</th>
+                    <th className="px-4 py-2 text-left font-semibold">Created Date</th>
+                    <th className="px-4 py-2 text-left font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {rfcDevices.map(device => (
+                    <tr key={device.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 font-mono text-blue-600">
+                        <button
+                          onClick={() => handleDeviceView(device)}
+                          className="hover:underline"
+                        >
+                          {device.imei}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 font-mono text-gray-700">{device.serial_number}</td>
+                      <td className="px-4 py-2">{device.VLTD_model_code}</td>
+                      <td className="px-4 py-2 font-mono text-gray-700">{device.certificate_number}</td>
+                      <td className="px-4 py-2">
+                        {device.distributor_entity_id || device.rfc_entity_id ? (
+                          <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-gray-600">
+                        {new Date(device.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeviceView(device)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

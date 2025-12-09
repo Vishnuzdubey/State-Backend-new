@@ -30,6 +30,7 @@ import { Settings } from '@/pages/super-admin/Settings';
 // Manufacturer Pages
 import { ManufacturerDashboard } from '@/pages/manufacturer/Dashboard';
 import { ManufacturerInventory } from '@/pages/manufacturer/Inventory';
+import { MDeviceDetails } from '@/pages/manufacturer/DeviceDetails';
 import { ManufacturerSettings } from '@/pages/manufacturer/Settings';
 import { Onboarding } from '@/pages/manufacturer/Onboarding';
 import ManufacturerRFCs from '@/pages/manufacturer/RFCs';
@@ -44,6 +45,7 @@ import ManufacturerUsers from '@/pages/manufacturer/Users';
 import { DistributorDashboard } from '@/pages/distributor/Dashboard';
 import { DistributorInventory } from '@/pages/distributor/Inventory';
 import { DistributorSettings } from '@/pages/distributor/Settings';
+import { DistributorRFCs } from '@/pages/distributor/RFCs';
 
 // RFC Pages
 import { RFCDashboard } from '@/pages/rfc/Dashboard';
@@ -147,6 +149,7 @@ function AppRoutes() {
         <Route path="devices" element={<ManufacturerDevices />} />
         <Route path="users" element={<ManufacturerUsers />} />
         <Route path="inventory" element={<ManufacturerInventory />} />
+        <Route path="inventory/:id" element={<MDeviceDetails />} />
         <Route path="settings" element={<ManufacturerSettings />} />
       </Route>
 
@@ -161,6 +164,7 @@ function AppRoutes() {
       >
         <Route index element={<DistributorDashboard />} />
         <Route path="inventory" element={<DistributorInventory />} />
+        <Route path="rfcs" element={<DistributorRFCs />} />
         <Route path="settings" element={<DistributorSettings />} />
       </Route>
 

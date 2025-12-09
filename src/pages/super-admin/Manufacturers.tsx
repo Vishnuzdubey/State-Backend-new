@@ -11,6 +11,7 @@ import { superAdminApi, type ManufacturerData } from '@/api';
 export function Manufacturers() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [manufacturers, setManufacturers] = useState<ManufacturerData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,12 +52,16 @@ export function Manufacturers() {
 
   const totalCount = manufacturers.length;
 
-  const filteredManufacturers = manufacturers.filter(manufacturer =>
-    manufacturer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manufacturer.gst.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manufacturer.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manufacturer.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredManufacturers = manufacturers.filter(manufacturer => {
+    const matchesSearch = manufacturer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      manufacturer.gst.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      manufacturer.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      manufacturer.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = !statusFilter || manufacturer.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   const columns = [
     {
@@ -160,25 +165,46 @@ export function Manufacturers() {
 
       {/* Summary and Export */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 flex-wrap">
           <div className="text-lg font-semibold">
             Total: <span className="text-blue-600">{totalCount}</span>
           </div>
-          <div className="text-sm">
-            <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
-              Pending: {manufacturers.filter(m => m.status === 'PENDING').length}
-            </Badge>
-          </div>
-          <div className="text-sm">
-            <Badge className="bg-blue-100 text-blue-800 border-blue-300">
-              Acknowledged: {manufacturers.filter(m => m.status === 'ACKNOWLEDGED').length}
-            </Badge>
-          </div>
-          <div className="text-sm">
-            <Badge className="bg-green-100 text-green-800 border-green-300">
-              Approved: {manufacturers.filter(m => m.status === 'APPROVED').length}
-            </Badge>
-          </div>
+          <button
+            onClick={() => setStatusFilter(null)}
+            className={`px-3 py-1 rounded transition-all ${statusFilter === null
+                ? 'bg-gray-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setStatusFilter('PENDING')}
+            className={`px-3 py-1 rounded transition-all font-medium ${statusFilter === 'PENDING'
+                ? 'bg-yellow-600 text-white'
+                : 'bg-yellow-100 text-yellow-800 border border-yellow-300 hover:bg-yellow-200'
+              }`}
+          >
+            Pending: {manufacturers.filter(m => m.status === 'PENDING').length}
+          </button>
+          <button
+            onClick={() => setStatusFilter('ACKNOWLEDGED')}
+            className={`px-3 py-1 rounded transition-all font-medium ${statusFilter === 'ACKNOWLEDGED'
+                ? 'bg-blue-600 text-white'
+                : 'bg-blue-100 text-blue-800 border border-blue-300 hover:bg-blue-200'
+              }`}
+          >
+            Acknowledged: {manufacturers.filter(m => m.status === 'ACKNOWLEDGED').length}
+          </button>
+          <button
+            onClick={() => setStatusFilter('APPROVED')}
+            className={`px-3 py-1 rounded transition-all font-medium ${statusFilter === 'APPROVED'
+                ? 'bg-green-600 text-white'
+                : 'bg-green-100 text-green-800 border border-green-300 hover:bg-green-200'
+              }`}
+          >
+            Approved: {manufacturers.filter(m => m.status === 'APPROVED').length}
+          </button>
         </div>
 
         <div className="flex gap-2">

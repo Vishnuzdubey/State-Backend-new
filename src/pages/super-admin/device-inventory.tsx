@@ -435,45 +435,45 @@ export function DeviceInventory() {
         <div className="text-sm">{new Date(value).toLocaleDateString()}</div>
       )
     },
-    {
-      key: 'certificate_number',
-      header: 'Certificate',
-      render: (value: string, row: DeviceWithLocation) => (
-        <div className="flex gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs"
-            onClick={async () => {
-              try {
-                await previewCertificate(row);
-              } catch (error) {
-                alert('Failed to preview certificate');
-              }
-            }}
-          >
-            <Eye className="h-3 w-3 mr-1" />
-            {value ? 'Preview' : 'N/A'}
-          </Button>
-          {value && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              onClick={async () => {
-                try {
-                  await printCertificate(row);
-                } catch (error) {
-                  alert('Failed to print certificate');
-                }
-              }}
-            >
-              <Printer className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
-      )
-    }
+    // {
+    //   key: 'certificate_number',
+    //   header: 'Certificate',
+    //   render: (value: string, row: DeviceWithLocation) => (
+    //     <div className="flex gap-1">
+    //       <Button
+    //         variant="outline"
+    //         size="sm"
+    //         className="text-xs"
+    //         onClick={async () => {
+    //           try {
+    //             await previewCertificate(row);
+    //           } catch (error) {
+    //             alert('Failed to preview certificate');
+    //           }
+    //         }}
+    //       >
+    //         <Eye className="h-3 w-3 mr-1" />
+    //         {value ? 'Preview' : 'N/A'}
+    //       </Button>
+    //       {value && (
+    //         <Button
+    //           variant="outline"
+    //           size="sm"
+    //           className="text-xs"
+    //           onClick={async () => {
+    //             try {
+    //               await printCertificate(row);
+    //             } catch (error) {
+    //               alert('Failed to print certificate');
+    //             }
+    //           }}
+    //         >
+    //           <Printer className="h-3 w-3" />
+    //         </Button>
+    //       )}
+    //     </div>
+    //   )
+    // }
   ];
 
   const deviceActions = [

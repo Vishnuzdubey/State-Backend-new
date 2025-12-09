@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Package, Send, Wifi, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Package, Send, Wifi, CheckCircle2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 
 export function DistributorInventory() {
+  const navigate = useNavigate();
   const [inventory, setInventory] = useState<InventoryDevice[]>([]);
   const [rfcs, setRfcs] = useState<RFCData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +38,8 @@ export function DistributorInventory() {
   const [rfcSearchTerm, setRfcSearchTerm] = useState('');
   const [page,] = useState(1);
   const [limit] = useState(100);
+  const [selectedDeviceForView, setSelectedDeviceForView] = useState<InventoryDevice | null>(null);
+  const [isDeviceDetailsDialogOpen, setIsDeviceDetailsDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchInventory();
@@ -131,6 +135,11 @@ export function DistributorInventory() {
     }
   };
 
+  const handleViewDeviceDetails = (device: InventoryDevice) => {
+    setSelectedDeviceForView(device);
+    setIsDeviceDetailsDialogOpen(true);
+  };
+
   const columns = [
     {
       key: 'select',
@@ -145,8 +154,13 @@ export function DistributorInventory() {
     {
       key: 'imei',
       header: 'IMEI',
-      render: (value: string) => (
-        <span className="font-mono text-sm font-medium">{value}</span>
+      render: (value: string, row: InventoryDevice) => (
+        <button
+          onClick={() => handleViewDeviceDetails(row)}
+          className="font-mono text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          {value}
+        </button>
       ),
     },
     {
@@ -183,14 +197,14 @@ export function DistributorInventory() {
     {
       key: 'rfc_entity_id',
       header: 'Status',
-      render: (value: string | null) => (
-        value ? (
+      render: (_value: string | null, row: InventoryDevice) => (
+        row.distributor_entity_id || row.rfc_entity_id ? (
           <Badge variant="default" className="bg-green-600">
             <CheckCircle2 className="h-3 w-3 mr-1" />
             Assigned
           </Badge>
         ) : (
-          <Badge variant="secondary">Unassigned</Badge>
+          <Badge variant="secondary">Not Assigned</Badge>
         )
       ),
     },
@@ -378,6 +392,102 @@ export function DistributorInventory() {
               {isAssigning ? 'Assigning...' : 'Assign to RFC'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Device Details Dialog */}
+      <Dialog open={isDeviceDetailsDialogOpen} onOpenChange={setIsDeviceDetailsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Device Details</DialogTitle>
+          </DialogHeader>
+
+          {selectedDeviceForView && (
+            <div className="space-y-6">
+              {/* Basic Info */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Basic Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">IMEI</p>
+                    <p className="font-mono font-semibold text-gray-900 break-all">{selectedDeviceForView.imei}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Serial Number</p>
+                    <p className="font-mono text-gray-900">{selectedDeviceForView.serial_number}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Model Code</p>
+                    <p className="font-mono text-gray-900">{selectedDeviceForView.VLTD_model_code}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Certificate</p>
+                    <p className="font-mono text-gray-900">{selectedDeviceForView.certificate_number || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* SIM Information */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">SIM Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">ICCID</p>
+                    <p className="font-mono text-gray-900 break-all text-xs">{selectedDeviceForView.ICCID}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">eSIM 1 (EID)</p>
+                    <p className="font-mono text-gray-900 break-all text-xs">{selectedDeviceForView.eSIM_1 || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">eSIM 1 Provider</p>
+                    <p className="font-semibold text-gray-900">
+                      <Badge className="bg-blue-100 text-blue-800">
+                        {selectedDeviceForView.eSIM_1_provider || 'N/A'}
+                      </Badge>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">eSIM 2 Provider</p>
+                    <p className="font-semibold text-gray-900">
+                      <Badge className="bg-green-100 text-green-800">
+                        {selectedDeviceForView.eSIM_2_provider || 'N/A'}
+                      </Badge>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Assignment Information */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Assignment Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">RFC ID</p>
+                    <p className="font-mono text-gray-900">{selectedDeviceForView.rfc_entity_id || 'Not Assigned'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Created Date</p>
+                    <p className="text-gray-900">{new Date(selectedDeviceForView.createdAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Status</h3>
+                <div>
+                  {selectedDeviceForView.distributor_entity_id || selectedDeviceForView.rfc_entity_id ? (
+                    <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

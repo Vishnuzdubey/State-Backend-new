@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/common/DataTable';
-import { Send, Mail, Calendar, Package, CheckCircle2, X } from 'lucide-react';
+import { Send, Mail, Calendar, Package, CheckCircle2, X, Eye, ExternalLink } from 'lucide-react';
 import { manufacturerApi, type ManufacturerDistributor, type InventoryItem } from '@/api/manufacturer';
 import {
   Dialog,
@@ -22,6 +23,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 
 export default function ManufacturerDistributors() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [distributors, setDistributors] = useState<ManufacturerDistributor[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,9 +34,27 @@ export default function ManufacturerDistributors() {
   const [selectedDistributor, setSelectedDistributor] = useState('');
   const [isAssigning, setIsAssigning] = useState(false);
 
+  // Device viewing state
+  const [isDevicesDialogOpen, setIsDevicesDialogOpen] = useState(false);
+  const [selectedDistributorForView, setSelectedDistributorForView] = useState<ManufacturerDistributor | null>(null);
+  const [distributorDevices, setDistributorDevices] = useState<InventoryItem[]>([]);
+  const [loadingDistributorDevices, setLoadingDistributorDevices] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Handle navigation from DeviceDetails with viewDistributorId state
+  useEffect(() => {
+    if (location.state?.viewDistributorId && distributors.length > 0) {
+      const distributorToView = distributors.find(d => d.entity_id === location.state.viewDistributorId);
+      if (distributorToView) {
+        handleViewDistributorDevices(distributorToView);
+        // Clear the state to prevent re-opening on page reload
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [location.state?.viewDistributorId, distributors]);
 
   const fetchData = async () => {
     try {
@@ -53,6 +74,35 @@ export default function ManufacturerDistributors() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchDistributorDevices = async (distributorId: string) => {
+    try {
+      setLoadingDistributorDevices(true);
+      const response = await manufacturerApi.getInventoryByQuery({
+        page: 1,
+        limit: 100,
+        search: '',
+        distributorId,
+      });
+      setDistributorDevices(response.data || []);
+    } catch (err) {
+      console.error('Failed to fetch distributor devices:', err);
+      setDistributorDevices([]);
+    } finally {
+      setLoadingDistributorDevices(false);
+    }
+  };
+
+  const handleViewDistributorDevices = (distributor: ManufacturerDistributor) => {
+    setSelectedDistributorForView(distributor);
+    setIsDevicesDialogOpen(true);
+    fetchDistributorDevices(distributor.id);
+  };
+
+  const handleDeviceView = (device: InventoryItem) => {
+    navigate('/manufacturer/inventory/' + device.id, { state: { device } });
+    setIsDevicesDialogOpen(false);
   };
 
   const handleAssignToDistributor = async () => {
@@ -121,8 +171,13 @@ export default function ManufacturerDistributors() {
     {
       key: 'name',
       header: 'Name',
-      render: (value: string) => (
-        <span className="font-medium">{value || 'N/A'}</span>
+      render: (value: string, row: ManufacturerDistributor) => (
+        <button
+          onClick={() => handleViewDistributorDevices(row)}
+          className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          {value || 'N/A'}
+        </button>
       ),
     },
     {
@@ -145,6 +200,21 @@ export default function ManufacturerDistributors() {
             {new Date(value).toLocaleDateString()}
           </span>
         </div>
+      ),
+    },
+    {
+      key: 'id',
+      header: 'Actions',
+      render: (_value: string, row: ManufacturerDistributor) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleViewDistributorDevices(row)}
+          className="text-blue-600 hover:text-blue-800"
+        >
+          <Eye className="h-4 w-4 mr-1" />
+          Devices
+        </Button>
       ),
     },
   ];
@@ -379,6 +449,93 @@ export default function ManufacturerDistributors() {
               {isAssigning ? 'Assigning...' : 'Assign'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Distributor Devices Dialog */}
+      <Dialog open={isDevicesDialogOpen} onOpenChange={setIsDevicesDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Devices for Distributor: {selectedDistributorForView?.name}
+              {selectedDistributorForView && (
+                <p className="text-sm font-normal text-gray-600 mt-1">{selectedDistributorForView.email}</p>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          {loadingDistributorDevices ? (
+            <div className="text-center py-8 text-gray-500">Loading devices...</div>
+          ) : distributorDevices.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No devices assigned to this distributor</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left font-semibold">IMEI</th>
+                    <th className="px-4 py-2 text-left font-semibold">Serial</th>
+                    <th className="px-4 py-2 text-left font-semibold">Model</th>
+                    <th className="px-4 py-2 text-left font-semibold">Certificate</th>
+                    <th className="px-4 py-2 text-left font-semibold">RFC</th>
+                    <th className="px-4 py-2 text-left font-semibold">Status</th>
+                    <th className="px-4 py-2 text-left font-semibold">Created Date</th>
+                    <th className="px-4 py-2 text-left font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {distributorDevices.map(device => (
+                    <tr key={device.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 font-mono text-blue-600">
+                        <button
+                          onClick={() => handleDeviceView(device)}
+                          className="hover:underline"
+                        >
+                          {device.imei}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 font-mono text-gray-700">{device.serial_number}</td>
+                      <td className="px-4 py-2">{device.VLTD_model_code}</td>
+                      <td className="px-4 py-2 font-mono text-gray-700">{device.certificate_number}</td>
+                      <td className="px-4 py-2">
+                        {device.rfc_entity_id ? (
+                          <button
+                            onClick={() => navigate(`/manufacturer/rfcs/${device.rfc_entity_id}`)}
+                            className="text-purple-600 hover:text-purple-800 hover:underline flex items-center gap-1"
+                          >
+                            <span className="text-xs truncate">{device.rfc_entity_id}</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        {device.distributor_entity_id || device.rfc_entity_id ? (
+                          <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-gray-600">
+                        {new Date(device.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeviceView(device)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

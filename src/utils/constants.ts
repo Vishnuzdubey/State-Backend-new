@@ -38,13 +38,14 @@ export const SIDEBAR_MENU = {
   { label: 'Inventory', path: '/manufacturer/inventory', icon: 'Package' },
   { label: 'RFC', path: '/manufacturer/rfcs', icon: 'Radio' },
   { label: 'Distributors', path: '/manufacturer/distributors', icon: 'Truck' },
-  { label: 'Devices', path: '/manufacturer/devices', icon: 'Cpu' },
-  { label: 'User Management', path: '/manufacturer/users', icon: 'Users' },
+  // { label: 'Devices', path: '/manufacturer/devices', icon: 'Cpu' },
+  // { label: 'User Management', path: '/manufacturer/users', icon: 'Users' },
     { label: 'Settings', path: '/manufacturer/settings', icon: 'Settings' }
   ],
   'distributor': [
     { label: 'Dashboard', path: '/distributor', icon: 'LayoutDashboard' },
     { label: 'Inventory', path: '/distributor/inventory', icon: 'Package' },
+    { label: 'RFCs', path: '/distributor/rfcs', icon: 'Radio' },
     { label: 'Settings', path: '/distributor/settings', icon: 'Settings' }
   ],
   'rfc': [

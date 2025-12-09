@@ -22,6 +22,8 @@ export interface InventoryItem extends InventoryDevice {
   distributor: string | null;
   createdAt: string;
   manufacturer_entity_id: string;
+  distributor_entity_id: string | null;
+  rfc_entity_id: string | null;
 }
 
 // interface BulkUploadRequest {
@@ -286,5 +288,63 @@ export const manufacturerApi = {
 
     console.log('✅ Devices assigned successfully');
     return data;
+  },
+
+  // Get RFCs assigned to manufacturer
+  getRFCs: async (): Promise<{ rfcs: ManufacturerDistributor[] }> => {
+    const token = tokenManager.getToken('MANUFACTURER');
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/manufacturer/rfcs`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to fetch RFCs' }));
+      throw new Error(error.message || `HTTP Error: ${response.status}`);
+    }
+
+    return await response.json();
+  },
+
+  // Get inventory with optional filtering by RFC or Distributor
+  getInventoryByQuery: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rfcId?: string;
+    distributorId?: string;
+  }): Promise<GetInventoryResponse> => {
+    const token = tokenManager.getToken('MANUFACTURER');
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', String(params.page));
+    if (params?.limit) queryParams.append('limit', String(params.limit));
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.rfcId) queryParams.append('rfcId', params.rfcId);
+    if (params?.distributorId) queryParams.append('distributorId', params.distributorId);
+
+    const url = `${API_BASE_URL}/manufacturer/inventory?${queryParams.toString()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to fetch inventory' }));
+      throw new Error(error.message || `HTTP Error: ${response.status}`);
+    }
+
+    return await response.json();
   },
 };
