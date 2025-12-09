@@ -197,8 +197,8 @@ export function DistributorInventory() {
     {
       key: 'rfc_entity_id',
       header: 'Status',
-      render: (_value: string | null, row: InventoryDevice) => (
-        row.distributor_entity_id || row.rfc_entity_id ? (
+      render: (value: string | null) => (
+        value ? (
           <Badge variant="default" className="bg-green-600">
             <CheckCircle2 className="h-3 w-3 mr-1" />
             Assigned
@@ -479,7 +479,7 @@ export function DistributorInventory() {
               <div className="space-y-3">
                 <h3 className="font-semibold text-lg">Status</h3>
                 <div>
-                  {selectedDeviceForView.distributor_entity_id || selectedDeviceForView.rfc_entity_id ? (
+                  {selectedDeviceForView.rfc_entity_id ? (
                     <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
                   ) : (
                     <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>

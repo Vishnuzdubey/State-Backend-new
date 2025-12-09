@@ -95,4 +95,28 @@ export const rfcApi = {
 
     throw new Error('Failed to fetch RFC inventory');
   },
+
+  generateCertificate: async (imei: string): Promise<any> => {
+    const token = tokenManager.getToken('RFC');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log('🔐 Generating certificate for IMEI:', imei);
+    const response = await fetch(`${API_BASE_URL}/rfc/inventory/generate-certificate/${imei}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log('✅ Certificate generated successfully for IMEI:', imei);
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to generate certificate');
+  },
 };

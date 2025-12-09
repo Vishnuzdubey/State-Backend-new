@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Package, Wifi, Shield, Calendar } from 'lucide-react';
+import { Package, Wifi, Shield, Calendar, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/DataTable';
 import { rfcApi, type RFCDevice } from '@/api/rfc';
 
@@ -9,6 +10,8 @@ export function RFCDevices() {
   const [devices, setDevices] = useState<RFCDevice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [generatingImei, setGeneratingImei] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDevices();
@@ -25,6 +28,29 @@ export function RFCDevices() {
       setError(err instanceof Error ? err.message : 'Failed to load devices');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateCertificate = async (imei: string) => {
+    setGeneratingImei(imei);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const result = await rfcApi.generateCertificate(imei);
+      console.log('✅ Certificate generation response:', result);
+      setSuccessMessage(`Certificate generated successfully for IMEI: ${imei}`);
+
+      // Refresh the devices list
+      await fetchDevices();
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      console.error('Failed to generate certificate:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate certificate');
+    } finally {
+      setGeneratingImei(null);
     }
   };
 
@@ -104,6 +130,22 @@ export function RFCDevices() {
         </div>
       ),
     },
+    {
+      key: 'id',
+      header: 'Actions',
+      render: (_value: string, row: RFCDevice) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleGenerateCertificate(row.imei)}
+          disabled={generatingImei === row.imei}
+          className="text-blue-600 hover:text-blue-800 gap-1"
+        >
+          <Zap className="h-4 w-4" />
+          {generatingImei === row.imei ? 'Generating...' : 'Generate'}
+        </Button>
+      ),
+    },
   ];
 
   const totalDevices = devices.length;
@@ -133,6 +175,12 @@ export function RFCDevices() {
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-800">{successMessage}</p>
         </div>
       )}
 

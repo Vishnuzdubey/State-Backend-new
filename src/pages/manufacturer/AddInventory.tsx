@@ -17,7 +17,6 @@ type InventoryDevice = {
   eSIM_2: string;
   eSIM_1_provider: string;
   eSIM_2_provider: string;
-  certificate_number: string;
 };
 
 type UploadMode = 'single' | 'bulk';
@@ -39,7 +38,6 @@ export default function AddInventory() {
     eSIM_2: '',
     eSIM_1_provider: '',
     eSIM_2_provider: '',
-    certificate_number: '',
   });
 
   // Bulk upload state
@@ -48,9 +46,9 @@ export default function AddInventory() {
   const [showPreview, setShowPreview] = useState(false);
 
   const downloadExampleCSV = () => {
-    const csvContent = `imei,serial_number,VLTD_model_code,ICCID,eSIM_1,eSIM_2,eSIM_1_provider,eSIM_2_provider,certificate_number
-863789450001001,SN-X1001,VLTD-XP01,8991101204500001001,EID100001-A1,EID100001-B1,Jio,Airtel,CERT-IND-00001
-863789450001002,SN-X1002,VLTD-XP01,8991101204500001002,EID100002-A1,EID100002-B1,Jio,BSNL,CERT-IND-00002`;
+    const csvContent = `imei,serial_number,VLTD_model_code,ICCID,eSIM_1,eSIM_2,eSIM_1_provider,eSIM_2_provider
+863789450001001,SN-X1001,VLTD-XP01,8991101204500001001,EID100001-A1,EID100001-B1,Jio,Airtel
+863789450001002,SN-X1002,VLTD-XP01,8991101204500001002,EID100002-A1,EID100002-B1,Jio,BSNL`;
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -83,7 +81,7 @@ export default function AddInventory() {
         console.log('📋 CSV Headers found:', headers);
         const requiredHeaders = [
           'imei', 'serial_number', 'VLTD_model_code', 'ICCID',
-          'eSIM_1', 'eSIM_2', 'eSIM_1_provider', 'eSIM_2_provider', 'certificate_number'
+          'eSIM_1', 'eSIM_2', 'eSIM_1_provider', 'eSIM_2_provider'
         ];
 
         const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
@@ -325,14 +323,6 @@ export default function AddInventory() {
                     placeholder="Airtel"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Certificate Number *</label>
-                  <Input
-                    value={singleDevice.certificate_number}
-                    onChange={(e) => handleSingleDeviceChange('certificate_number', e.target.value)}
-                    placeholder="CERT-IND-00001"
-                  />
-                </div>
               </div>
 
               <div className="flex gap-3 pt-4">
@@ -413,7 +403,6 @@ export default function AddInventory() {
                             <th className="px-4 py-2 text-left">ICCID</th>
                             <th className="px-4 py-2 text-left">eSIM 1</th>
                             <th className="px-4 py-2 text-left">eSIM 2</th>
-                            <th className="px-4 py-2 text-left">Certificate</th>
                             <th className="px-4 py-2"></th>
                           </tr>
                         </thead>
@@ -426,7 +415,6 @@ export default function AddInventory() {
                               <td className="px-4 py-2">{device.ICCID}</td>
                               <td className="px-4 py-2">{device.eSIM_1}</td>
                               <td className="px-4 py-2">{device.eSIM_2}</td>
-                              <td className="px-4 py-2">{device.certificate_number}</td>
                               <td className="px-4 py-2">
                                 <Button
                                   variant="ghost"

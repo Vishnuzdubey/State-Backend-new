@@ -258,6 +258,17 @@ export default function ManufacturerDistributors() {
         <span className="text-sm font-mono">{value}</span>
       ),
     },
+    {
+      key: 'rfc_entity_id',
+      header: 'Status',
+      render: (_value: string | null, row: InventoryItem) => (
+        row.distributor_entity_id || row.rfc_entity_id ? (
+          <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
+        ) : (
+          <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>
+        )
+      ),
+    },
   ];
 
   if (loading) {
