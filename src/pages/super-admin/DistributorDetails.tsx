@@ -10,12 +10,6 @@ import { CheckCircle } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { superAdminApi, type DistributorData } from '@/api/superAdmin';
 import { manufacturerApi, type InventoryItem } from '@/api/manufacturer';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 export function DistributorDetails() {
   const navigate = useNavigate();
@@ -30,13 +24,13 @@ export function DistributorDetails() {
   const [showAssignRFC, setShowAssignRFC] = useState(false);
   const [distributorDevices, setDistributorDevices] = useState<InventoryItem[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(false);
-  const [isDevicesDialogOpen, setIsDevicesDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchDistributorDetails();
       fetchDistributorRFCs();
       fetchAvailableRFCs();
+      fetchDistributorDevices();
     }
   }, [id]);
 
@@ -506,38 +500,29 @@ export function DistributorDetails() {
       {/* Distributor Devices */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Devices
-            </CardTitle>
-            <Button
-              onClick={handleViewDistributorDevices}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              View Devices
-            </Button>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Devices ({distributorDevices.length})
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-1">
+            All devices assigned to {distributorData?.name}
+          </p>
         </CardHeader>
-      </Card>
-
-      {/* Devices Dialog */}
-      <Dialog open={isDevicesDialogOpen} onOpenChange={setIsDevicesDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Devices for Distributor: {distributorData?.name}
-            </DialogTitle>
-          </DialogHeader>
-
+        <CardContent>
           {loadingDevices ? (
-            <div className="text-center py-8 text-gray-500">Loading devices...</div>
+            <div className="text-center py-8 text-gray-500">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p>Loading devices...</p>
+            </div>
           ) : distributorDevices.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">No devices found for this distributor</div>
+            <div className="text-center py-12 text-gray-500">
+              <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-lg font-medium">No devices found</p>
+              <p className="text-sm">No devices are currently assigned to this distributor</p>
+            </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
+              <table className="w-full border-collapse text-sm">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-2 text-left font-semibold">IMEI</th>
@@ -545,33 +530,46 @@ export function DistributorDetails() {
                     <th className="px-4 py-2 text-left font-semibold">Model</th>
                     <th className="px-4 py-2 text-left font-semibold">Certificate</th>
                     <th className="px-4 py-2 text-left font-semibold">Manufacturer</th>
+                    <th className="px-4 py-2 text-left font-semibold">Distributor</th>
                     <th className="px-4 py-2 text-left font-semibold">RFC</th>
                     <th className="px-4 py-2 text-left font-semibold">Status</th>
                     <th className="px-4 py-2 text-left font-semibold">Created Date</th>
                     <th className="px-4 py-2 text-left font-semibold">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {distributorDevices.map(device => (
+                <tbody className="divide-y">
+                  {distributorDevices.map((device) => (
                     <tr key={device.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 font-mono text-blue-600">
+                      <td className="px-4 py-2">
                         <button
-                          onClick={() => navigate('/manufacturer/inventory/' + device.id, { state: { device } })}
-                          className="hover:underline"
+                          onClick={() => navigate(`/manufacturer/inventory/${device.id}`)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                         >
                           {device.imei}
                         </button>
                       </td>
-                      <td className="px-4 py-2 font-mono text-gray-700">{device.serial_number}</td>
-                      <td className="px-4 py-2">{device.VLTD_model_code}</td>
-                      <td className="px-4 py-2 font-mono text-gray-700">{device.certificate_number}</td>
+                      <td className="px-4 py-2 font-mono text-gray-700">{device.serial_number || '-'}</td>
+                      <td className="px-4 py-2">{device.VLTD_model_code || '-'}</td>
+                      <td className="px-4 py-2 font-mono text-gray-700">{device.certificate_number || '-'}</td>
                       <td className="px-4 py-2">
                         {device.manufacturer_entity_id ? (
                           <button
                             onClick={() => navigate(`/super-admin/manufacturers/${device.manufacturer_entity_id}`)}
-                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                            className="text-orange-600 hover:text-orange-800 hover:underline font-medium"
                           >
-                            {device.manufacturer_entity_id}
+                            {device.manufacturer_entity?.name || device.manufacturer_entity_id}
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        {device.distributor_entity_id ? (
+                          <button
+                            onClick={() => navigate(`/super-admin/distributors/${device.distributor_entity_id}`)}
+                            className="text-green-600 hover:text-green-800 hover:underline font-medium"
+                          >
+                            {device.distributor_entity?.name || device.distributor_entity_id}
                           </button>
                         ) : (
                           <span className="text-gray-400">-</span>
@@ -583,18 +581,16 @@ export function DistributorDetails() {
                             onClick={() => navigate(`/super-admin/rfcs/${device.rfc_entity_id}`)}
                             className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
                           >
-                            {device.rfc_entity_id}
+                            {device.rfc_entity?.name || device.rfc_entity_id}
                           </button>
                         ) : (
                           <span className="text-gray-400">-</span>
                         )}
                       </td>
                       <td className="px-4 py-2">
-                        {device.rfc_entity_id ? (
-                          <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>
-                        )}
+                        <Badge className={device.rfc_entity_id ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                          {device.rfc_entity_id ? 'Assigned' : 'Not Assigned'}
+                        </Badge>
                       </td>
                       <td className="px-4 py-2 text-gray-600">
                         {new Date(device.createdAt).toLocaleDateString()}
@@ -603,7 +599,7 @@ export function DistributorDetails() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => navigate('/manufacturer/inventory/' + device.id, { state: { device } })}
+                          onClick={() => navigate(`/manufacturer/inventory/${device.id}`)}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           <Eye className="w-4 h-4" />
@@ -615,8 +611,8 @@ export function DistributorDetails() {
               </table>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -127,7 +127,7 @@ export function DeviceDetails() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Device Information */}
-        <Card>
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Smartphone className="h-5 w-5" />
@@ -135,7 +135,7 @@ export function DeviceDetails() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <p className="text-sm text-gray-600">IMEI</p>
                 <p className="font-mono font-medium">{device.imei}</p>
@@ -145,20 +145,20 @@ export function DeviceDetails() {
                 <p className="font-mono font-medium">{device.serial_number}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Manufacturer</p>
-                <p className="font-medium">{device.manufacturer}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Distributor</p>
-                <p className="font-medium">{device.distributor}</p>
-              </div>
-              <div>
                 <p className="text-sm text-gray-600">VLTD Model Code</p>
                 <p className="font-medium">{device.VLTD_model_code}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">ICCID</p>
                 <p className="font-mono text-sm">{device.ICCID}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">eSIM 1</p>
+                <p className="font-mono text-sm">{device.eSIM_1}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">eSIM 2</p>
+                <p className="font-mono text-sm">{device.eSIM_2}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Created At</p>
@@ -172,28 +172,77 @@ export function DeviceDetails() {
           </CardContent>
         </Card>
 
-        {/* eSIM Information */}
+        {/* Entity Information - Manufacturer, Distributor, RFC */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wifi className="h-5 w-5" />
-              eSIM Information
+              <Info className="h-5 w-5" />
+              Entity Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="border rounded-lg p-4 bg-blue-50">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-700">eSIM 1</p>
-                <Badge variant="outline">{device.eSIM_1_provider}</Badge>
-              </div>
-              <p className="font-mono text-sm">{device.eSIM_1}</p>
+            {/* Manufacturer */}
+            <div className="border rounded-lg p-4 bg-orange-50">
+              <p className="text-sm font-medium text-gray-700 mb-2">Manufacturer</p>
+              {(device as any).manufacturer_entity_id ? (
+                <button
+                  onClick={() => navigate(`/super-admin/manufacturers/${(device as any).manufacturer_entity_id}`)}
+                  className="text-orange-600 hover:text-orange-800 hover:underline font-medium block mb-2"
+                >
+                  {(device as any).manufacturer_entity?.name || (device as any).manufacturer_entity_id || 'Unknown'}
+                </button>
+              ) : (
+                <span className="text-gray-400">Not assigned</span>
+              )}
+              {(device as any).manufacturer_entity && (
+                <div className="mt-2 text-xs space-y-1 text-gray-600">
+                  <p><strong>Email:</strong> {(device as any).manufacturer_entity.email}</p>
+                  <p><strong>GST:</strong> {(device as any).manufacturer_entity.gst}</p>
+                  <p><strong>PAN:</strong> {(device as any).manufacturer_entity.pan}</p>
+                </div>
+              )}
             </div>
+
+            {/* Distributor */}
             <div className="border rounded-lg p-4 bg-green-50">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-700">eSIM 2</p>
-                <Badge variant="outline">{device.eSIM_2_provider}</Badge>
-              </div>
-              <p className="font-mono text-sm">{device.eSIM_2}</p>
+              <p className="text-sm font-medium text-gray-700 mb-2">Distributor</p>
+              {(device as any).distributor_entity_id ? (
+                <button
+                  onClick={() => navigate(`/super-admin/distributors/${(device as any).distributor_entity_id}`)}
+                  className="text-green-600 hover:text-green-800 hover:underline font-medium block mb-2"
+                >
+                  {(device as any).distributor_entity?.name || (device as any).distributor_entity_id || 'Unknown'}
+                </button>
+              ) : (
+                <span className="text-gray-400">Not assigned</span>
+              )}
+              {(device as any).distributor_entity && (
+                <div className="mt-2 text-xs space-y-1 text-gray-600">
+                  <p><strong>Email:</strong> {(device as any).distributor_entity.email}</p>
+                  <p><strong>Created:</strong> {new Date((device as any).distributor_entity.createdAt).toLocaleDateString()}</p>
+                </div>
+              )}
+            </div>
+
+            {/* RFC */}
+            <div className="border rounded-lg p-4 bg-purple-50">
+              <p className="text-sm font-medium text-gray-700 mb-2">RFC (Authorized Service Partner)</p>
+              {(device as any).rfc_entity_id ? (
+                <button
+                  onClick={() => navigate(`/super-admin/rfcs/${(device as any).rfc_entity_id}`)}
+                  className="text-purple-600 hover:text-purple-800 hover:underline font-medium block mb-2"
+                >
+                  {(device as any).rfc_entity?.name || (device as any).rfc_entity_id || 'Unknown'}
+                </button>
+              ) : (
+                <span className="text-gray-400">Not assigned</span>
+              )}
+              {(device as any).rfc_entity && (
+                <div className="mt-2 text-xs space-y-1 text-gray-600">
+                  <p><strong>Email:</strong> {(device as any).rfc_entity.email}</p>
+                  <p><strong>Created:</strong> {new Date((device as any).rfc_entity.createdAt).toLocaleDateString()}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

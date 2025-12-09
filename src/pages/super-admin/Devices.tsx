@@ -87,12 +87,7 @@ export function Devices() {
   };
 
   const columns = [
-    {
-      key: 'serial_number',
-      header: 'Serial No',
-      sortable: true,
-      render: (value: string) => <span className="font-mono text-sm">{value}</span>
-    },
+
     {
       key: 'imei',
       header: 'IMEI',
@@ -112,8 +107,54 @@ export function Devices() {
       sortable: true,
       render: (value: string) => <Badge variant="outline">{value}</Badge>
     },
-    { key: 'manufacturer', header: 'Manufacturer' },
-    { key: 'distributor', header: 'Distributor' },
+    {
+      key: 'manufacturer_entity_id',
+      header: 'Manufacturer',
+      render: (value: string, row: any) => (
+        value ? (
+          <button
+            onClick={() => navigate(`/super-admin/manufacturers/${value}`)}
+            className="text-orange-600 hover:text-orange-800 hover:underline font-medium"
+          >
+            {row.manufacturer_entity?.name || value}
+          </button>
+        ) : (
+          <span className="text-gray-400">-</span>
+        )
+      )
+    },
+    {
+      key: 'distributor_entity_id',
+      header: 'Distributor',
+      render: (value: string, row: any) => (
+        value ? (
+          <button
+            onClick={() => navigate(`/super-admin/distributors/${value}`)}
+            className="text-green-600 hover:text-green-800 hover:underline font-medium"
+          >
+            {row.distributor_entity?.name || value}
+          </button>
+        ) : (
+          <span className="text-gray-400">-</span>
+        )
+      )
+    },
+        {
+      key: 'rfc_entity_id',
+      header: 'RFC Name',
+      render: (value: string, row: any) => (
+        value ? (
+          <button
+            onClick={() => navigate(`/super-admin/rfcs/${value}`)}
+            className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
+          >
+            {row.rfc_entity?.name || value}
+          </button>
+        ) : (
+          <span className="text-gray-400">-</span>
+        )
+      )
+    },
     {
       key: 'vehicle',
       header: 'Vehicle',

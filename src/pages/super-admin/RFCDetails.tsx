@@ -40,7 +40,7 @@ export function RFCDetails() {
       }
 
       setRfcData(rfc);
-      
+
       // Fetch RFC devices
       await fetchRFCDevices();
     } catch (err) {
@@ -332,7 +332,7 @@ export function RFCDetails() {
                             onClick={() => navigate(`/super-admin/manufacturers/${device.manufacturer_entity_id}`)}
                             className="text-orange-600 hover:text-orange-800 hover:underline font-medium"
                           >
-                            {device.manufacturer_entity_id}
+                            {device.manufacturer_entity?.name || device.manufacturer_entity_id}
                           </button>
                         ) : (
                           <span className="text-gray-400">-</span>
@@ -344,7 +344,7 @@ export function RFCDetails() {
                             onClick={() => navigate(`/super-admin/distributors/${device.distributor_entity_id}`)}
                             className="text-green-600 hover:text-green-800 hover:underline font-medium"
                           >
-                            {device.distributor_entity_id}
+                            {device.distributor_entity?.name || device.distributor_entity_id}
                           </button>
                         ) : (
                           <span className="text-gray-400">-</span>

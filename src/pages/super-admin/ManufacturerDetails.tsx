@@ -133,7 +133,7 @@ export function ManufacturerDetails() {
     try {
       setLoadingDevices(true);
       console.log('🔄 Fetching manufacturer devices with ID:', id);
-      
+
       // Try with manufacturerApi first (uses MANUFACTURER token), fallback to superAdminApi
       let response;
       try {
@@ -150,7 +150,7 @@ export function ManufacturerDetails() {
           limit: 100
         });
       }
-      
+
       console.log('✅ Response received:', response);
       setDevices(response.data || []);
       console.log('📱 Loaded manufacturer devices:', response.data);
@@ -863,7 +863,7 @@ export function ManufacturerDetails() {
                               onClick={() => navigate(`/super-admin/distributors/${device.distributor_entity_id}`)}
                               className="text-green-600 hover:text-green-800 hover:underline font-medium"
                             >
-                              {device.distributor_entity_id}
+                              {device.distributor_entity?.name || device.distributor_entity_id}
                             </button>
                           ) : (
                             <span className="text-gray-400">-</span>
@@ -875,7 +875,7 @@ export function ManufacturerDetails() {
                               onClick={() => navigate(`/super-admin/rfcs/${device.rfc_entity_id}`)}
                               className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
                             >
-                              {device.rfc_entity_id}
+                              {device.rfc_entity?.name || device.rfc_entity_id}
                             </button>
                           ) : (
                             <span className="text-gray-400">-</span>

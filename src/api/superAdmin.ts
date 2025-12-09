@@ -175,6 +175,32 @@ export interface DeviceData {
   certificate_number: string;
   createdAt: string;
   vehicle: DeviceVehicle | null;
+  manufacturer_entity_id?: string | null;
+  distributor_entity_id?: string | null;
+  rfc_entity_id?: string | null;
+  manufacturer_entity?: {
+    id: string;
+    name: string;
+    gst?: string;
+    pan?: string;
+    email: string;
+    password?: string;
+    createdAt: string;
+  } | null;
+  distributor_entity?: {
+    id: string;
+    name: string;
+    email: string;
+    password?: string;
+    createdAt: string;
+  } | null;
+  rfc_entity?: {
+    id: string;
+    name: string;
+    email: string;
+    password?: string;
+    createdAt: string;
+  } | null;
 }
 
 export interface GetDevicesResponse {
@@ -519,11 +545,11 @@ export const superAdminApi = {
 
     const queryParams = new URLSearchParams({
       page: String(params?.page || 1),
-      pageSize: String(params?.pageSize || 100),
+      limit: String(params?.pageSize || 100),
     });
 
-    console.log('📱 Fetching devices...');
-    const response = await fetch(`${API_BASE_URL}/admin/devices?${queryParams}`, {
+    console.log('📱 Fetching devices from inventory endpoint...');
+    const response = await fetch(`${API_BASE_URL}/admin/inventory?${queryParams}`, {
       method: 'GET',
       headers: {
         'Authorization': token,
@@ -535,8 +561,13 @@ export const superAdminApi = {
     const data = await response.json();
 
     if (response.ok && data.status === 'success') {
-      console.log('✅ Devices fetched:', data.devices.length);
-      return data;
+      console.log('✅ Devices fetched:', data.data.length);
+      // Transform data to match expected GetDevicesResponse format
+      return {
+        status: data.status,
+        message: 'success',
+        devices: data.data || []
+      };
     }
 
     throw new Error(data.message || 'Failed to fetch devices');
