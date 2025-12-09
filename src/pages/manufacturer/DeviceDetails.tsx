@@ -294,20 +294,17 @@ RFC Entity ID: ${device.rfc_entity_id || 'N/A'}
           <CardTitle>Assignment Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Manufacturer - Just show the ID with link to manufacturer's own dashboard */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">Manufacturer</label>
               {device.manufacturer_entity_id ? (
                 <button
-
                   className="w-full p-3 bg-blue-50 border border-blue-300 rounded text-left hover:bg-blue-100 transition flex items-center justify-between group"
                 >
                   <div>
                     <p className="text-xs text-blue-700 font-mono break-all">ID: {device.manufacturer_entity_id}</p>
-                    {/* <p className="text-xs text-blue-600 mt-1">Click to view manufacturer details</p> */}
                   </div>
-                  {/* <ExternalLink className="h-4 w-4 text-blue-600 group-hover:text-blue-800 flex-shrink-0" /> */}
                 </button>
               ) : (
                 <div className="p-3 bg-gray-50 border rounded font-mono text-sm text-gray-900">
@@ -316,22 +313,19 @@ RFC Entity ID: ${device.rfc_entity_id || 'N/A'}
               )}
             </div>
 
-            {/* Distributor - Navigate to Distributors page to view devices */}
+            {/* Distributor - Show entity name with details */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">Distributor</label>
               {device.distributor_entity_id ? (
-                <button
-                  onClick={() => navigate(`/manufacturer/distributors`, { state: { viewDistributorId: device.distributor_entity_id } })}
-                  className="w-full p-3 bg-green-50 border border-green-300 rounded text-left hover:bg-green-100 transition flex items-center justify-between group"
-                >
+                <div className="w-full p-3 bg-green-50 border border-green-300 rounded">
                   <div>
                     <p className="text-sm font-semibold text-green-900">
-                      {loadingNames ? 'Loading...' : (distributorName || device.distributor_entity_id)}
+                      {device.distributor_entity?.name || 'Unnamed Distributor'}
                     </p>
-                    <p className="text-xs text-green-700 font-mono">{device.distributor_entity_id}</p>
+                    <p className="text-xs text-green-700 font-mono mt-1">{device.distributor_entity?.email}</p>
+                    <p className="text-xs text-green-600 font-mono mt-1">ID: {device.distributor_entity_id}</p>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-green-600 group-hover:text-green-800" />
-                </button>
+                </div>
               ) : (
                 <div className="p-3 bg-gray-50 border rounded font-mono text-sm text-gray-900">
                   Not assigned
@@ -339,20 +333,19 @@ RFC Entity ID: ${device.rfc_entity_id || 'N/A'}
               )}
             </div>
 
-            {/* RFC - Navigate to RFCs page to view devices */}
+            {/* RFC - Show entity name with details */}
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-2">RFC</label>
+              <label className="text-sm font-medium text-gray-700 block mb-2">RFC (Authorized Service Partner)</label>
               {device.rfc_entity_id ? (
-                <button
-                  onClick={() => navigate(`/manufacturer/rfcs`, { state: { viewRFCId: device.rfc_entity_id } })}
-                  className="w-full p-3 bg-purple-50 border border-purple-300 rounded text-left hover:bg-purple-100 transition flex items-center justify-between group"
-                >
+                <div className="w-full p-3 bg-purple-50 border border-purple-300 rounded">
                   <div>
-                    <p className="text-sm font-semibold text-purple-900 font-mono break-all">{device.rfc_entity_id}</p>
-                    <p className="text-xs text-purple-600 mt-1">Click to view RFC devices</p>
+                    <p className="text-sm font-semibold text-purple-900">
+                      {device.rfc_entity?.name || 'Unnamed RFC'}
+                    </p>
+                    <p className="text-xs text-purple-700 font-mono mt-1">{device.rfc_entity?.email}</p>
+                    <p className="text-xs text-purple-600 font-mono mt-1">ID: {device.rfc_entity_id}</p>
                   </div>
-                  <ExternalLink className="h-4 w-4 text-purple-600 group-hover:text-purple-800" />
-                </button>
+                </div>
               ) : (
                 <div className="p-3 bg-gray-50 border rounded font-mono text-sm text-gray-900">
                   Not assigned

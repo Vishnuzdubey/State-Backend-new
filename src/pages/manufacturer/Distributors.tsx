@@ -259,6 +259,32 @@ export default function ManufacturerDistributors() {
       ),
     },
     {
+      key: 'distributor_entity_id',
+      header: 'Distributor',
+      render: (_value: string | null, row: InventoryItem) => (
+        row.distributor_entity ? (
+          <span className="text-sm font-medium text-green-700">
+            {row.distributor_entity.name || 'Unnamed'}
+          </span>
+        ) : (
+          <span className="text-gray-400 text-sm">-</span>
+        )
+      ),
+    },
+    {
+      key: 'rfc_entity_id',
+      header: 'RFC',
+      render: (_value: string | null, row: InventoryItem) => (
+        row.rfc_entity ? (
+          <span className="text-sm font-medium text-purple-700">
+            {row.rfc_entity.name || 'Unnamed'}
+          </span>
+        ) : (
+          <span className="text-gray-400 text-sm">-</span>
+        )
+      ),
+    },
+    {
       key: 'rfc_entity_id',
       header: 'Status',
       render: (_value: string | null, row: InventoryItem) => (
@@ -509,12 +535,12 @@ export default function ManufacturerDistributors() {
                       <td className="px-4 py-2">{device.VLTD_model_code}</td>
                       <td className="px-4 py-2 font-mono text-gray-700">{device.certificate_number}</td>
                       <td className="px-4 py-2">
-                        {device.rfc_entity_id ? (
+                        {device.rfc_entity_id && device.rfc_entity ? (
                           <button
                             onClick={() => navigate(`/manufacturer/rfcs/${device.rfc_entity_id}`)}
                             className="text-purple-600 hover:text-purple-800 hover:underline flex items-center gap-1"
                           >
-                            <span className="text-xs truncate">{device.rfc_entity_id}</span>
+                            <span className="text-xs">{device.rfc_entity.name || device.rfc_entity_id}</span>
                             <ExternalLink className="h-3 w-3" />
                           </button>
                         ) : (

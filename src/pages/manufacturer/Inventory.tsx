@@ -45,7 +45,7 @@ export function ManufacturerInventory() {
   }, [query, inventory]);
 
   const downloadCSV = (rows: InventoryItem[]) => {
-    const headers = ['#', 'IMEI', 'Serial Number', 'Model Code', 'ICCID', 'eSIM 1', 'eSIM 1 Provider', 'eSIM 2', 'eSIM 2 Provider', 'Certificate', 'Created Date'];
+    const headers = ['#', 'IMEI', 'Serial Number', 'Model Code', 'ICCID', 'eSIM 1', 'eSIM 1 Provider', 'eSIM 2', 'eSIM 2 Provider', 'Certificate', 'Distributor', 'RFC', 'Created Date'];
     const body = rows.map((r, idx) => [
       String(idx + 1),
       r.imei,
@@ -57,6 +57,8 @@ export function ManufacturerInventory() {
       r.eSIM_2,
       r.eSIM_2_provider || '',
       r.certificate_number || '',
+      r.distributor_entity?.name || r.distributor_entity_id || '-',
+      r.rfc_entity?.name || r.rfc_entity_id || '-',
       new Date(r.createdAt).toLocaleDateString()
     ]);
     const csv = [headers, ...body].map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n');
@@ -70,7 +72,7 @@ export function ManufacturerInventory() {
   };
 
   const downloadExcel = (rows: InventoryItem[]) => {
-    const headers = ['#', 'IMEI', 'Serial Number', 'Model Code', 'ICCID', 'eSIM 1', 'eSIM 1 Provider', 'eSIM 2', 'eSIM 2 Provider', 'Certificate', 'Created Date'];
+    const headers = ['#', 'IMEI', 'Serial Number', 'Model Code', 'ICCID', 'eSIM 1', 'eSIM 1 Provider', 'eSIM 2', 'eSIM 2 Provider', 'Certificate', 'Distributor', 'RFC', 'Created Date'];
     const body = rows.map((r, idx) => [
       String(idx + 1),
       r.imei,
@@ -82,6 +84,8 @@ export function ManufacturerInventory() {
       r.eSIM_2,
       r.eSIM_2_provider || '',
       r.certificate_number || '',
+      r.distributor_entity?.name || r.distributor_entity_id || '-',
+      r.rfc_entity?.name || r.rfc_entity_id || '-',
       new Date(r.createdAt).toLocaleDateString()
     ]);
     const csv = [headers, ...body].map(r => r.join('\t')).join('\n');
@@ -124,6 +128,8 @@ export function ManufacturerInventory() {
                 <th>eSIM 2</th>
                 <th>eSIM 2 Provider</th>
                 <th>Certificate</th>
+                <th>Distributor</th>
+                <th>RFC</th>
                 <th>Created Date</th>
               </tr>
             </thead>
@@ -140,6 +146,8 @@ export function ManufacturerInventory() {
                   <td>${r.eSIM_2}</td>
                   <td>${r.eSIM_2_provider || '-'}</td>
                   <td>${r.certificate_number || '-'}</td>
+                  <td>${r.distributor_entity?.name || r.distributor_entity_id || '-'}</td>
+                  <td>${r.rfc_entity?.name || r.rfc_entity_id || '-'}</td>
                   <td>${new Date(r.createdAt).toLocaleDateString()}</td>
                 </tr>
               `).join('')}
@@ -266,6 +274,8 @@ export function ManufacturerInventory() {
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">#</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">IMEI</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Distributor</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">RFC</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">Serial Number</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">Model Code</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-700">ICCID</th>
@@ -290,6 +300,24 @@ export function ManufacturerInventory() {
                         >
                           {device.imei}
                         </button>
+                      </td>
+                      <td className="px-4 py-3">
+                        {device.distributor_entity ? (
+                          <span className="text-sm font-medium text-green-700">
+                            {device.distributor_entity.name || 'Unnamed'}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {device.rfc_entity ? (
+                          <span className="text-sm font-medium text-purple-700">
+                            {device.rfc_entity.name || 'Unnamed'}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-sm">-</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 font-mono text-gray-700">{device.serial_number}</td>
                       <td className="px-4 py-3 text-gray-700">{device.VLTD_model_code}</td>

@@ -139,7 +139,7 @@ export function Devices() {
         )
       )
     },
-        {
+    {
       key: 'rfc_entity_id',
       header: 'RFC Name',
       render: (value: string, row: any) => (
