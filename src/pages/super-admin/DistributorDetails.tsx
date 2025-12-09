@@ -120,12 +120,24 @@ export function DistributorDetails() {
 
     try {
       setLoadingDevices(true);
-      const response = await manufacturerApi.getInventoryByQuery({
-        page: 1,
-        limit: 100,
-        search: '',
-        distributorId: id,
-      });
+      // Try with manufacturerApi first (uses MANUFACTURER token), fallback to superAdminApi
+      let response;
+      try {
+        response = await manufacturerApi.getInventoryByQuery({
+          page: 1,
+          limit: 100,
+          search: '',
+          distributorId: id,
+        });
+      } catch (err: any) {
+        console.log('⚠️ ManufacturerAPI failed, trying SuperAdminAPI:', err.message);
+        response = await superAdminApi.getInventoryByQuery({
+          page: 1,
+          limit: 100,
+          search: '',
+          distributorId: id,
+        });
+      }
       setDistributorDevices(response.data || []);
     } catch (err) {
       console.error('Failed to fetch distributor devices:', err);
@@ -532,6 +544,8 @@ export function DistributorDetails() {
                     <th className="px-4 py-2 text-left font-semibold">Serial</th>
                     <th className="px-4 py-2 text-left font-semibold">Model</th>
                     <th className="px-4 py-2 text-left font-semibold">Certificate</th>
+                    <th className="px-4 py-2 text-left font-semibold">Manufacturer</th>
+                    <th className="px-4 py-2 text-left font-semibold">RFC</th>
                     <th className="px-4 py-2 text-left font-semibold">Status</th>
                     <th className="px-4 py-2 text-left font-semibold">Created Date</th>
                     <th className="px-4 py-2 text-left font-semibold">Actions</th>
@@ -542,7 +556,7 @@ export function DistributorDetails() {
                     <tr key={device.id} className="hover:bg-gray-50">
                       <td className="px-4 py-2 font-mono text-blue-600">
                         <button
-                          onClick={() => handleDeviceView(device)}
+                          onClick={() => navigate('/manufacturer/inventory/' + device.id, { state: { device } })}
                           className="hover:underline"
                         >
                           {device.imei}
@@ -552,7 +566,31 @@ export function DistributorDetails() {
                       <td className="px-4 py-2">{device.VLTD_model_code}</td>
                       <td className="px-4 py-2 font-mono text-gray-700">{device.certificate_number}</td>
                       <td className="px-4 py-2">
-                        {device.distributor_entity_id || device.rfc_entity_id ? (
+                        {device.manufacturer_entity_id ? (
+                          <button
+                            onClick={() => navigate(`/super-admin/manufacturers/${device.manufacturer_entity_id}`)}
+                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                          >
+                            {device.manufacturer_entity_id}
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        {device.rfc_entity_id ? (
+                          <button
+                            onClick={() => navigate(`/super-admin/rfcs/${device.rfc_entity_id}`)}
+                            className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
+                          >
+                            {device.rfc_entity_id}
+                          </button>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        {device.rfc_entity_id ? (
                           <Badge className="bg-green-100 text-green-800 border-green-300">Assigned</Badge>
                         ) : (
                           <Badge variant="outline" className="text-gray-600">Not Assigned</Badge>
@@ -565,7 +603,7 @@ export function DistributorDetails() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeviceView(device)}
+                          onClick={() => navigate('/manufacturer/inventory/' + device.id, { state: { device } })}
                           className="text-blue-600 hover:text-blue-800"
                         >
                           <Eye className="w-4 h-4" />

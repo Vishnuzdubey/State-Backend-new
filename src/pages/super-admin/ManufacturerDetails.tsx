@@ -20,6 +20,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { superAdminApi, type ManufacturerData } from '@/api';
+import { manufacturerApi } from '@/api/manufacturer';
 
 export function ManufacturerDetails() {
   const { id } = useParams();
@@ -39,6 +40,8 @@ export function ManufacturerDetails() {
   const [allRFCs, setAllRFCs] = useState<any[]>([]);
   const [loadingRFCs, setLoadingRFCs] = useState(false);
   const [showAssignDistributor, setShowAssignDistributor] = useState(false);
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
 
   useEffect(() => {
     fetchManufacturerDetails();
@@ -121,6 +124,42 @@ export function ManufacturerDetails() {
       console.error('Failed to fetch RFCs:', err);
     } finally {
       setLoadingRFCs(false);
+    }
+  };
+
+  const fetchManufacturerDevices = async () => {
+    if (!id) return;
+
+    try {
+      setLoadingDevices(true);
+      console.log('🔄 Fetching manufacturer devices with ID:', id);
+      
+      // Try with manufacturerApi first (uses MANUFACTURER token), fallback to superAdminApi
+      let response;
+      try {
+        response = await manufacturerApi.getInventoryByQuery({
+          manufacturerId: id,
+          page: 1,
+          limit: 100
+        });
+      } catch (err: any) {
+        console.log('⚠️ ManufacturerAPI failed, trying SuperAdminAPI:', err.message);
+        response = await superAdminApi.getInventoryByQuery({
+          manufacturerId: id,
+          page: 1,
+          limit: 100
+        });
+      }
+      
+      console.log('✅ Response received:', response);
+      setDevices(response.data || []);
+      console.log('📱 Loaded manufacturer devices:', response.data);
+    } catch (err: any) {
+      console.error('❌ Failed to fetch manufacturer devices:', err);
+      console.error('Error details:', err.message);
+      setError(`Failed to load devices: ${err.message}`);
+    } finally {
+      setLoadingDevices(false);
     }
   };
 
@@ -401,7 +440,10 @@ export function ManufacturerDetails() {
         </button>
         <button
           className={`px-4 py-2 text-sm font-medium border-b-2 ${activeTab === 'devices' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-          onClick={() => setActiveTab('devices')}
+          onClick={() => {
+            setActiveTab('devices');
+            if (devices.length === 0) fetchManufacturerDevices();
+          }}
         >
           Devices
         </button>
@@ -775,12 +817,90 @@ export function ManufacturerDetails() {
       {activeTab === 'devices' && (
         <Card>
           <CardHeader>
-            <CardTitle>Devices</CardTitle>
+            <CardTitle>Manufacturer Devices ({devices.length})</CardTitle>
+            <p className="text-sm text-gray-600 mt-1">
+              All devices manufactured by {manufacturer.name}
+            </p>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12 text-gray-500">
-              <p>Device information coming soon...</p>
-            </div>
+            {loadingDevices ? (
+              <div className="text-center py-8 text-gray-500">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p>Loading devices...</p>
+              </div>
+            ) : devices.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left font-semibold">IMEI</th>
+                      <th className="px-4 py-2 text-left font-semibold">Serial</th>
+                      <th className="px-4 py-2 text-left font-semibold">Model</th>
+                      <th className="px-4 py-2 text-left font-semibold">Certificate</th>
+                      <th className="px-4 py-2 text-left font-semibold">Distributor</th>
+                      <th className="px-4 py-2 text-left font-semibold">RFC</th>
+                      <th className="px-4 py-2 text-left font-semibold">Status</th>
+                      <th className="px-4 py-2 text-left font-semibold">Created Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {devices.map((device) => (
+                      <tr key={device.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-2">
+                          <button
+                            onClick={() => navigate(`/manufacturer/inventory/${device.id}`)}
+                            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                          >
+                            {device.imei}
+                          </button>
+                        </td>
+                        <td className="px-4 py-2 text-sm">{device.serial_number || '-'}</td>
+                        <td className="px-4 py-2 text-sm">{device.VLTD_model_code || '-'}</td>
+                        <td className="px-4 py-2 text-sm">{device.certificate_number || '-'}</td>
+                        <td className="px-4 py-2">
+                          {device.distributor_entity_id ? (
+                            <button
+                              onClick={() => navigate(`/super-admin/distributors/${device.distributor_entity_id}`)}
+                              className="text-green-600 hover:text-green-800 hover:underline font-medium"
+                            >
+                              {device.distributor_entity_id}
+                            </button>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          {device.rfc_entity_id ? (
+                            <button
+                              onClick={() => navigate(`/super-admin/rfcs/${device.rfc_entity_id}`)}
+                              className="text-purple-600 hover:text-purple-800 hover:underline font-medium"
+                            >
+                              {device.rfc_entity_id}
+                            </button>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2">
+                          <Badge className={device.rfc_entity_id ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                            {device.rfc_entity_id ? 'Assigned' : 'Not Assigned'}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-2 text-sm">
+                          {new Date(device.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No devices found</p>
+                <p className="text-sm">This manufacturer has not created any devices yet</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

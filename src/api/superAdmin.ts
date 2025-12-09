@@ -566,6 +566,63 @@ export const superAdminApi = {
     throw new Error(data.message || 'Failed to fetch device details');
   },
 
+  getInventoryByQuery: async (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rfcId?: string;
+    distributorId?: string;
+    manufacturerId?: string;
+  }): Promise<{ status: string; data: any[] }> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', String(params.page));
+    if (params?.limit) queryParams.append('limit', String(params.limit));
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.rfcId) queryParams.append('rfcId', params.rfcId);
+    if (params?.distributorId) queryParams.append('distributorId', params.distributorId);
+    if (params?.manufacturerId) queryParams.append('manufacturerId', params.manufacturerId);
+
+    console.log('📦 Fetching inventory with filters:', {
+      rfcId: params.rfcId,
+      distributorId: params.distributorId,
+      manufacturerId: params.manufacturerId,
+    });
+
+    const url = `${API_BASE_URL}/admin/inventory?${queryParams.toString()}`;
+    console.log('📌 Request URL:', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    console.log('📦 Inventory response:', {
+      status: response.status,
+      dataStatus: data.status,
+      dataMessage: data.message,
+      dataLength: data.data?.length,
+    });
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ Inventory fetched:', data.data.length);
+      return data;
+    }
+
+    // Handle error with better diagnostics
+    const errorMsg = data.message || data.error || 'Failed to fetch inventory';
+    console.error('❌ Inventory fetch error:', errorMsg, data);
+    throw new Error(errorMsg);
+  },
+
   getDeviceLocations: async (): Promise<GetDeviceLocationsResponse> => {
     const token = tokenManager.getToken('SUPER_ADMIN');
     if (!token) throw new Error('Not authenticated');
