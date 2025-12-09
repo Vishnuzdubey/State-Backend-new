@@ -1,6 +1,6 @@
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Copy, Download, Check, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Copy, Download, Check} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +15,8 @@ export function MDeviceDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [distributorName, setDistributorName] = useState<string | null>(null);
-  const [loadingNames, setLoadingNames] = useState(false);
+  const [, setDistributorName] = useState<string | null>(null);
+  const [, setLoadingNames] = useState(false);
 
   useEffect(() => {
     // First try to get device from location state

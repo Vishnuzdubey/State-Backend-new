@@ -1,11 +1,11 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import  { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, RefreshCw, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { DataTable } from '@/components/common/DataTable';
+
 import { manufacturerApi, type InventoryItem } from '@/api';
 
 export function ManufacturerInventory() {
@@ -13,9 +13,9 @@ export function ManufacturerInventory() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState<string>('');
-  const [fromDate, setFromDate] = useState<string>('2025-03-05');
-  const [toDate, setToDate] = useState<string>('2025-10-30');
-  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  // const [fromDate, setFromDate] = useState<string>('2025-03-05');
+  // const [toDate, setToDate] = useState<string>('2025-10-30');
+  // const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchInventory = async () => {

@@ -5,7 +5,7 @@ import {
   Smartphone,
 
   Calendar,
-  Wifi,
+
 
   User,
   Car,

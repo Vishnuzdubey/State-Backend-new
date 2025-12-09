@@ -141,15 +141,15 @@ export function DistributorDetails() {
     }
   };
 
-  const handleViewDistributorDevices = () => {
-    setIsDevicesDialogOpen(true);
-    fetchDistributorDevices();
-  };
+  // const handleViewDistributorDevices = () => {
+  //   setIsDevicesDialogOpen(true);
+  //   fetchDistributorDevices();
+  // };
 
-  const handleDeviceView = (device: InventoryItem) => {
-    navigate('/manufacturer/inventory/' + device.id, { state: { device } });
-    setIsDevicesDialogOpen(false);
-  };
+  // const handleDeviceView = (device: InventoryItem) => {
+  //   navigate('/manufacturer/inventory/' + device.id, { state: { device } });
+  //   setIsDevicesDialogOpen(false);
+  // };
 
   // Mock user details
   // const userDetails = [

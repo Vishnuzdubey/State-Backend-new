@@ -138,14 +138,14 @@ export function ManufacturerDetails() {
       let response;
       try {
         response = await manufacturerApi.getInventoryByQuery({
-          manufacturerId: id,
+          distributorId: id,
           page: 1,
           limit: 100
         });
       } catch (err: any) {
         console.log('⚠️ ManufacturerAPI failed, trying SuperAdminAPI:', err.message);
         response = await superAdminApi.getInventoryByQuery({
-          manufacturerId: id,
+          distributorId: id,
           page: 1,
           limit: 100
         });

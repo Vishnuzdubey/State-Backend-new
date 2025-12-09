@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Package, Send, Wifi, CheckCircle2, Eye } from 'lucide-react';
+import { Package, Send, Wifi, CheckCircle2} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +25,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 
 export function DistributorInventory() {
-  const navigate = useNavigate();
   const [inventory, setInventory] = useState<InventoryDevice[]>([]);
   const [rfcs, setRfcs] = useState<RFCData[]>([]);
   const [loading, setLoading] = useState(true);

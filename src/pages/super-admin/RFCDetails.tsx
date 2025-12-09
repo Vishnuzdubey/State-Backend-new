@@ -4,7 +4,7 @@ import { ArrowLeft, Smartphone, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DataTable } from '@/components/common/DataTable';
+// import { DataTable } from '@/components/common/DataTable';
 import { useNavigate, useParams } from 'react-router-dom';
 import { superAdminApi, type RFCData } from '@/api/superAdmin';
 import { manufacturerApi } from '@/api/manufacturer';
@@ -92,7 +92,7 @@ export function RFCDetails() {
   // ];
 
   // Mock device details (empty for now)
-  const deviceDetails: string | any[] = [];
+  // const deviceDetails: string | any[] = [];
   //   {
   //     key: 'fullName',
   //     header: 'Full Name',
@@ -138,12 +138,12 @@ export function RFCDetails() {
   //   }
   // ];
 
-  const deviceColumns = [
-    { key: 'deviceId', header: 'Device ID' },
-    { key: 'imei', header: 'IMEI Number' },
-    { key: 'status', header: 'Status' },
-    { key: 'lastSeen', header: 'Last Seen' }
-  ];
+  // const deviceColumns = [
+  //   { key: 'deviceId', header: 'Device ID' },
+  //   { key: 'imei', header: 'IMEI Number' },
+  //   { key: 'status', header: 'Status' },
+  //   { key: 'lastSeen', header: 'Last Seen' }
+  // ];
 
   if (loading) {
     return (

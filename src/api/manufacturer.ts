@@ -10,7 +10,7 @@ export interface InventoryDevice {
   eSIM_2: string;
   eSIM_1_provider: string;
   eSIM_2_provider: string;
-  certificate_number: string;
+  certificate_number?: string;
 }
 
 export interface InventoryItem extends InventoryDevice {
@@ -24,6 +24,25 @@ export interface InventoryItem extends InventoryDevice {
   manufacturer_entity_id: string;
   distributor_entity_id: string | null;
   rfc_entity_id: string | null;
+  distributor_entity: {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+  } | null;
+  rfc_entity: {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+  } | null;
+  manufacturer_entity: {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+  } | null;
+
 }
 
 // interface BulkUploadRequest {
@@ -45,6 +64,7 @@ interface GetInventoryResponse {
 }
 
 export interface ManufacturerDistributor {
+  entity_id: any;
   id: string;
   name: string;
   email: string;
