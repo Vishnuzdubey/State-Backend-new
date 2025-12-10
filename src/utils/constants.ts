@@ -51,6 +51,7 @@ export const SIDEBAR_MENU = {
   'rfc': [
     { label: 'Dashboard', path: '/rfc', icon: 'LayoutDashboard' },
     { label: 'Devices', path: '/rfc/devices', icon: 'Cpu' },
+    { label: 'Users', path: '/rfc/users', icon: 'Users' },
     { label: 'Settings', path: '/rfc/settings', icon: 'Settings' }
   ]
 };

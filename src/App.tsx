@@ -50,7 +50,10 @@ import { DistributorRFCs } from '@/pages/distributor/RFCs';
 // RFC Pages
 import { RFCDashboard } from '@/pages/rfc/Dashboard';
 import { RFCDevices } from '@/pages/rfc/Devices';
+import { RFCDeviceDetails } from '@/pages/rfc/DeviceDetails';
 import { RFCSettings } from '@/pages/rfc/Settings';
+import { RFCUsers } from '@/pages/rfc/Users';
+import { RFCUserDetails } from '@/pages/rfc/UserDetails';
 
 function AppRoutes() {
   const { user, isAuthenticated } = useAuth();
@@ -179,6 +182,9 @@ function AppRoutes() {
       >
         <Route index element={<RFCDashboard />} />
         <Route path="devices" element={<RFCDevices />} />
+        <Route path="devices/:imei" element={<RFCDeviceDetails />} />
+        <Route path="users" element={<RFCUsers />} />
+        <Route path="users/:id" element={<RFCUserDetails />} />
         <Route path="settings" element={<RFCSettings />} />
       </Route>
 
