@@ -37,7 +37,11 @@ export function Login() {
   if (isAuthenticated && user) {
     const redirectPath = user.role === 'super-admin'
       ? '/super-admin'
-      : `/${user.role}`;
+      : user.role === 'manufacturer' && user.status === 'APPROVED'
+        ? '/manufacturer'
+        : user.role === 'manufacturer'
+          ? '/manufacturer/onboarding'
+          : `/${user.role}`;
     return <Navigate to={redirectPath} replace />;
   }
 
@@ -48,8 +52,8 @@ export function Login() {
     const success = await login(data.email, data.password);
 
     if (success) {
-      // Navigation will happen based on redirect logic
-      navigate('/');
+      // Navigation will happen via dashboard redirect
+      navigate('/dashboard');
     } else {
       setError('Invalid email or password');
     }

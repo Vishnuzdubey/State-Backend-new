@@ -5,6 +5,7 @@ import { ManufacturerStatusGuard } from '@/components/ManufacturerStatusGuard';
 import { Layout } from '@/components/layout/Layout';
 import { Login } from '@/pages/auth/Login';
 import { Register } from '@/pages/auth/Register';
+import { LandingPage } from '@/pages/LandingPage';
 
 // Super Admin Pages
 import { SuperAdminDashboard } from '@/pages/super-admin/Dashboard';
@@ -58,9 +59,9 @@ import { RFCUserDetails } from '@/pages/rfc/UserDetails';
 function AppRoutes() {
   const { user, isAuthenticated } = useAuth();
 
-  // Root redirect based on user role and status
-  const getRootRedirect = () => {
-    if (!isAuthenticated || !user) return '/login';
+  // Dashboard redirect based on user role and status
+  const getDashboardRedirect = () => {
+    if (!isAuthenticated || !user) return '/';
 
     switch (user.role) {
       case 'super-admin':
@@ -78,16 +79,19 @@ function AppRoutes() {
       case 'rfc':
         return '/rfc';
       default:
-        return '/login';
+        return '/';
     }
   };
 
   return (
     <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      <Route path="/" element={<Navigate to={getRootRedirect()} replace />} />
+      {/* Dashboard redirect route */}
+      <Route path="/dashboard" element={<Navigate to={getDashboardRedirect()} replace />} />
 
       {/* Super Admin Routes */}
       <Route
