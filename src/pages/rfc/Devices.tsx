@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Wifi, Shield, Calendar, Zap, Plus, Search, X, Printer } from 'lucide-react';
+import { Package, Wifi, Shield, Calendar, Zap, Plus, Search, Printer } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -710,7 +710,7 @@ export function RFCDevices() {
                     value={createUserForm.first_name}
                     onChange={(e) => setCreateUserForm({...createUserForm, first_name: e.target.value})}
                     placeholder="First Name"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -719,7 +719,7 @@ export function RFCDevices() {
                     value={createUserForm.last_name}
                     onChange={(e) => setCreateUserForm({...createUserForm, last_name: e.target.value})}
                     placeholder="Last Name"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -732,7 +732,7 @@ export function RFCDevices() {
                     onChange={(e) => setCreateUserForm({...createUserForm, email: e.target.value})}
                     placeholder="Email"
                     type="email"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -741,7 +741,7 @@ export function RFCDevices() {
                     value={createUserForm.phone}
                     onChange={(e) => setCreateUserForm({...createUserForm, phone: e.target.value})}
                     placeholder="Phone"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -752,7 +752,7 @@ export function RFCDevices() {
                   value={createUserForm.address}
                   onChange={(e) => setCreateUserForm({...createUserForm, address: e.target.value})}
                   placeholder="Address"
-                  size="sm"
+                  className="text-sm"
                 />
               </div>
 
@@ -763,7 +763,7 @@ export function RFCDevices() {
                     value={createUserForm.pincode}
                     onChange={(e) => setCreateUserForm({...createUserForm, pincode: e.target.value})}
                     placeholder="Pincode"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -772,7 +772,7 @@ export function RFCDevices() {
                     value={createUserForm.district}
                     onChange={(e) => setCreateUserForm({...createUserForm, district: e.target.value})}
                     placeholder="District"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -781,7 +781,7 @@ export function RFCDevices() {
                     value={createUserForm.state}
                     onChange={(e) => setCreateUserForm({...createUserForm, state: e.target.value})}
                     placeholder="State"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -792,7 +792,7 @@ export function RFCDevices() {
                   value={createUserForm.permit_holder_type}
                   onChange={(e) => setCreateUserForm({...createUserForm, permit_holder_type: e.target.value})}
                   placeholder="e.g., Type D"
-                  size="sm"
+                  className="text-sm"
                 />
               </div>
 
@@ -850,7 +850,7 @@ export function RFCDevices() {
                     value={assignForm.owner_name}
                     onChange={(e) => setAssignForm({...assignForm, owner_name: e.target.value})}
                     placeholder="Owner Name"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -859,7 +859,7 @@ export function RFCDevices() {
                     value={assignForm.owner_email}
                     onChange={(e) => setAssignForm({...assignForm, owner_email: e.target.value})}
                     placeholder="Email"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -871,7 +871,7 @@ export function RFCDevices() {
                     value={assignForm.owner_phone}
                     onChange={(e) => setAssignForm({...assignForm, owner_phone: e.target.value})}
                     placeholder="Phone"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -880,7 +880,7 @@ export function RFCDevices() {
                     value={assignForm.owner_address}
                     onChange={(e) => setAssignForm({...assignForm, owner_address: e.target.value})}
                     placeholder="Address"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -891,7 +891,7 @@ export function RFCDevices() {
                   value={assignForm.rc_registered_name}
                   onChange={(e) => setAssignForm({...assignForm, rc_registered_name: e.target.value})}
                   placeholder="RC Registered Name"
-                  size="sm"
+                  className="text-sm"
                 />
               </div>
 
@@ -902,7 +902,7 @@ export function RFCDevices() {
                     value={assignForm.vehicle_number}
                     onChange={(e) => setAssignForm({...assignForm, vehicle_number: e.target.value})}
                     placeholder="e.g., TES-1234"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -911,7 +911,7 @@ export function RFCDevices() {
                     value={assignForm.chassis_number}
                     onChange={(e) => setAssignForm({...assignForm, chassis_number: e.target.value})}
                     placeholder="Chassis Number"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
               </div>
@@ -923,7 +923,7 @@ export function RFCDevices() {
                     value={assignForm.vehicle_make}
                     onChange={(e) => setAssignForm({...assignForm, vehicle_make: e.target.value})}
                     placeholder="e.g., Tesla"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
                 <div>
@@ -932,7 +932,7 @@ export function RFCDevices() {
                     value={assignForm.vehicle_model}
                     onChange={(e) => setAssignForm({...assignForm, vehicle_model: e.target.value})}
                     placeholder="e.g., Model 3"
-                    size="sm"
+                    className="text-sm"
                   />
                 </div>
               </div>

@@ -65,7 +65,7 @@ export function RFCUserDetails() {
   const [error, setError] = useState<string | null>(null);
   const [deviceDetailsOpen, setDeviceDetailsOpen] = useState<string | null>(null);
   const [selectedDevice, setSelectedDevice] = useState<any>(null);
-  const [deviceLoading, setDeviceLoading] = useState(false);
+  const [, setDeviceLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;

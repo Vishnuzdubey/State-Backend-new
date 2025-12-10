@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Wifi, Shield, Package, Calendar, MapPin, User, Phone, Mail, Printer } from 'lucide-react';
+import { ChevronLeft, Wifi, Package, Calendar, MapPin, User, Phone, Mail, Printer } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
