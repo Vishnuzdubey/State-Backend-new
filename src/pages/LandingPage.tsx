@@ -71,7 +71,7 @@ export function LandingPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  VahanSaarthi
+                  Vahan Saarthi
                 </h1>
                 <p className="text-xs text-gray-500">Vehicle Tracking Admin</p>
               </div>
@@ -250,7 +250,7 @@ export function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Why Choose VahanSaarthi?
+                Why Choose Vahan Saarthi?
               </h2>
               <p className="text-lg text-gray-600 mb-8">
                 Built for scale, security, and efficiency. Our platform streamlines 
@@ -322,7 +322,7 @@ export function LandingPage() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join hundreds of manufacturers, distributors, and RFCs using VahanSaarthi
+            Join hundreds of manufacturers, distributors, and RFCs using Vahan Saarthi
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
@@ -353,7 +353,7 @@ export function LandingPage() {
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
                   <Cpu className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-white">VahanSaarthi</span>
+                <span className="text-xl font-bold text-white">Vahan Saarthi</span>
               </div>
               <p className="text-sm">
                 Advanced vehicle tracking device management platform
@@ -385,7 +385,7 @@ export function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
-            <p>&copy; 2025 VahanSaarthi. All rights reserved.</p>
+            <p>&copy; 2025 Vahan Saarthi. All rights reserved.</p>
           </div>
         </div>
       </footer>
