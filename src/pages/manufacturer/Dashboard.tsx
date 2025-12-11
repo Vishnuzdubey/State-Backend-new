@@ -7,6 +7,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { StatsCard } from '@/components/common/StatsCard';
+import { MapComponent } from '@/components/common/MapComponent';
 
 export function ManufacturerDashboard() {
   const metrics = {
@@ -148,6 +149,9 @@ export function ManufacturerDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Device Location Map */}
+      <MapComponent height="500px" />
 
       {/* Status Indicators */}
       {(metrics.expiringIn30Days > 0 || metrics.expiredNotRenewed > 0) && (

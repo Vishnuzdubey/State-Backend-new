@@ -6,6 +6,7 @@ import {
   Box
 } from 'lucide-react';
 import { StatsCard } from '@/components/common/StatsCard';
+import { MapComponent } from '@/components/common/MapComponent';
 import { distributorApi } from '@/api/distributor';
 
 export function DistributorDashboard() {
@@ -88,6 +89,9 @@ export function DistributorDashboard() {
           icon={Users}
         />
       </div>
+
+      {/* Device Location Map */}
+      <MapComponent height="500px" />
     </div>
   );
 }

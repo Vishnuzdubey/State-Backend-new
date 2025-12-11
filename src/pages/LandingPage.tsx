@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapComponent } from '@/components/common/MapComponent';
 import { 
   Cpu, 
   Shield, 
@@ -70,7 +71,7 @@ export function LandingPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  RoadEye
+                  VahanSaarthi
                 </h1>
                 <p className="text-xs text-gray-500">Vehicle Tracking Admin</p>
               </div>
@@ -221,13 +222,35 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Live Tracking Demo Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Real-Time Device Tracking
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Monitor all your devices on an interactive map powered by OpenStreetMap
+            </p>
+          </div>
+          <div className="max-w-5xl mx-auto">
+            <MapComponent height="600px" />
+          </div>
+          <div className="text-center mt-8">
+            <p className="text-sm text-gray-500">
+              Live tracking view shows real-time locations of all registered devices
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Benefits Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Why Choose RoadEye?
+                Why Choose VahanSaarthi?
               </h2>
               <p className="text-lg text-gray-600 mb-8">
                 Built for scale, security, and efficiency. Our platform streamlines 
@@ -299,7 +322,7 @@ export function LandingPage() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join hundreds of manufacturers, distributors, and RFCs using RoadEye
+            Join hundreds of manufacturers, distributors, and RFCs using VahanSaarthi
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
@@ -330,7 +353,7 @@ export function LandingPage() {
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
                   <Cpu className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xl font-bold text-white">RoadEye</span>
+                <span className="text-xl font-bold text-white">VahanSaarthi</span>
               </div>
               <p className="text-sm">
                 Advanced vehicle tracking device management platform
@@ -362,7 +385,7 @@ export function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-sm text-center">
-            <p>&copy; 2025 RoadEye. All rights reserved.</p>
+            <p>&copy; 2025 VahanSaarthi. All rights reserved.</p>
           </div>
         </div>
       </footer>
