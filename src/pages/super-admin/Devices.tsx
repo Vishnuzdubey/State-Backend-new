@@ -30,6 +30,11 @@ export function Devices() {
     manufacturer: '',
     distributor: '',
     VLTD_model_code: '',
+    ICCID: '',
+    eSIM_1: '',
+    eSIM_2: '',
+    eSIM_1_provider: '',
+    eSIM_2_provider: '',
   });
 
   useEffect(() => {
@@ -61,6 +66,11 @@ export function Devices() {
         manufacturer: '',
         distributor: '',
         VLTD_model_code: '',
+        ICCID: '',
+        eSIM_1: '',
+        eSIM_2: '',
+        eSIM_1_provider: '',
+        eSIM_2_provider: '',
       });
       fetchDevices();
     } catch (err) {
@@ -207,13 +217,13 @@ export function Devices() {
             <Map className="mr-2 h-4 w-4" />
             Live Map
           </Button>
-          <Button
+          {/* <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => setIsAddDialogOpen(true)}
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Device
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -236,64 +246,130 @@ export function Devices() {
 
       {/* Add Device Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Device</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="imei">IMEI *</Label>
-              <Input
-                id="imei"
-                value={newDevice.imei}
-                onChange={(e) => setNewDevice({ ...newDevice, imei: e.target.value })}
-                placeholder="Enter IMEI number"
-              />
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900">Basic Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="imei">IMEI <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="imei"
+                    value={newDevice.imei}
+                    onChange={(e) => setNewDevice({ ...newDevice, imei: e.target.value })}
+                    placeholder="Enter IMEI number"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="serial">Serial Number <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="serial"
+                    value={newDevice.serial_number}
+                    onChange={(e) => setNewDevice({ ...newDevice, serial_number: e.target.value })}
+                    placeholder="Enter serial number"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="model">VLTD Model Code <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="model"
+                    value={newDevice.VLTD_model_code}
+                    onChange={(e) => setNewDevice({ ...newDevice, VLTD_model_code: e.target.value })}
+                    placeholder="Enter model code"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="iccid">ICCID</Label>
+                  <Input
+                    id="iccid"
+                    value={newDevice.ICCID}
+                    onChange={(e) => setNewDevice({ ...newDevice, ICCID: e.target.value })}
+                    placeholder="Enter ICCID"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="serial">Serial Number *</Label>
-              <Input
-                id="serial"
-                value={newDevice.serial_number}
-                onChange={(e) => setNewDevice({ ...newDevice, serial_number: e.target.value })}
-                placeholder="Enter serial number"
-              />
+
+            {/* Entity Information */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900">Entity Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="manufacturer">Manufacturer <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="manufacturer"
+                    value={newDevice.manufacturer}
+                    onChange={(e) => setNewDevice({ ...newDevice, manufacturer: e.target.value })}
+                    placeholder="Enter manufacturer name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="distributor">Distributor <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="distributor"
+                    value={newDevice.distributor}
+                    onChange={(e) => setNewDevice({ ...newDevice, distributor: e.target.value })}
+                    placeholder="Enter distributor name"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="manufacturer">Manufacturer *</Label>
-              <Input
-                id="manufacturer"
-                value={newDevice.manufacturer}
-                onChange={(e) => setNewDevice({ ...newDevice, manufacturer: e.target.value })}
-                placeholder="Enter manufacturer name"
-              />
-            </div>
-            <div>
-              <Label htmlFor="distributor">Distributor *</Label>
-              <Input
-                id="distributor"
-                value={newDevice.distributor}
-                onChange={(e) => setNewDevice({ ...newDevice, distributor: e.target.value })}
-                placeholder="Enter distributor name"
-              />
-            </div>
-            <div>
-              <Label htmlFor="model">VLTD Model Code *</Label>
-              <Input
-                id="model"
-                value={newDevice.VLTD_model_code}
-                onChange={(e) => setNewDevice({ ...newDevice, VLTD_model_code: e.target.value })}
-                placeholder="Enter model code"
-              />
+
+            {/* SIM Information */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900">SIM Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="esim1">eSIM 1</Label>
+                  <Input
+                    id="esim1"
+                    value={newDevice.eSIM_1}
+                    onChange={(e) => setNewDevice({ ...newDevice, eSIM_1: e.target.value })}
+                    placeholder="Enter eSIM 1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="esim1Provider">eSIM 1 Provider</Label>
+                  <Input
+                    id="esim1Provider"
+                    value={newDevice.eSIM_1_provider}
+                    onChange={(e) => setNewDevice({ ...newDevice, eSIM_1_provider: e.target.value })}
+                    placeholder="Enter eSIM 1 provider"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="esim2">eSIM 2</Label>
+                  <Input
+                    id="esim2"
+                    value={newDevice.eSIM_2}
+                    onChange={(e) => setNewDevice({ ...newDevice, eSIM_2: e.target.value })}
+                    placeholder="Enter eSIM 2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="esim2Provider">eSIM 2 Provider</Label>
+                  <Input
+                    id="esim2Provider"
+                    value={newDevice.eSIM_2_provider}
+                    onChange={(e) => setNewDevice({ ...newDevice, eSIM_2_provider: e.target.value })}
+                    placeholder="Enter eSIM 2 provider"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancel
             </Button>
             <Button
               onClick={handleAddDevice}
               disabled={!newDevice.imei || !newDevice.serial_number || !newDevice.manufacturer || !newDevice.distributor || !newDevice.VLTD_model_code || loading}
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {loading ? 'Creating...' : 'Create Device'}
             </Button>

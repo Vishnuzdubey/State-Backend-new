@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   Activity,
   Package,
@@ -7,14 +8,44 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { StatsCard } from '@/components/common/StatsCard';
+import { MapComponent } from '@/components/common/MapComponent';
+import { manufacturerApi } from '@/api/manufacturer';
 
 export function ManufacturerDashboard() {
-  const metrics = {
-    activeDevices: 3203,
-    inventoryUploaded: 8626,
-    activations7Days: 36,
+  const [metrics, setMetrics] = useState({
+    activeDevices: 0,
+    inventoryUploaded: 0,
+    activations7Days: 0,
     expiringIn30Days: 0,
     expiredNotRenewed: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await manufacturerApi.getDashboard();
+      
+      // Map API response to component metrics
+      setMetrics({
+        activeDevices: response.data.activeInventory,
+        inventoryUploaded: response.data.inventoryCount,
+        activations7Days: response.data.activationsInLastWeek,
+        expiringIn30Days: response.data.inventoryExpiring,
+        expiredNotRenewed: response.data.inventoryExpired
+      });
+    } catch (err) {
+      console.error('Failed to fetch dashboard:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,6 +59,21 @@ export function ManufacturerDashboard() {
         </p>
       </div>
 
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-200">{error}</p>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading dashboard data...</p>
+          </div>
+        </div>
+      ) : (
+        <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatsCard
           title="Active Devices"
@@ -74,80 +120,13 @@ export function ManufacturerDashboard() {
         />
       </div>
 
-      {/* Additional Status Information */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Device Status Overview */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Device Status Overview
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Total Active Devices</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-400">
-                {metrics.activeDevices.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Recent Activations (7 days)</span>
-              <span className="font-semibold text-green-600 dark:text-green-400">
-                +{metrics.activations7Days}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Devices Expiring Soon</span>
-              <span className={`font-semibold ${metrics.expiringIn30Days > 0
-                  ? 'text-yellow-600 dark:text-yellow-400'
-                  : 'text-gray-500 dark:text-gray-400'
-                }`}>
-                {metrics.expiringIn30Days}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Expired Devices</span>
-              <span className={`font-semibold ${metrics.expiredNotRenewed > 0
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-gray-500 dark:text-gray-400'
-                }`}>
-                {metrics.expiredNotRenewed}
-              </span>
-            </div>
-          </div>
-        </div>
 
-        {/* Inventory Status */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Inventory Management
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Total Inventory Uploaded</span>
-              <span className="font-semibold text-green-600 dark:text-green-400">
-                {metrics.inventoryUploaded.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Devices Assigned</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-400">
-                {metrics.activeDevices.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Available for Assignment</span>
-              <span className="font-semibold text-purple-600 dark:text-purple-400">
-                {(metrics.inventoryUploaded - metrics.activeDevices).toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 dark:text-gray-400">Assignment Rate</span>
-              <span className="font-semibold text-gray-600 dark:text-gray-400">
-                {((metrics.activeDevices / metrics.inventoryUploaded) * 100).toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+
+      {/* Additional Status Information */}
+      
+
+      {/* Device Location Map */}
+      <MapComponent height="500px" />
 
       {/* Status Indicators */}
       {(metrics.expiringIn30Days > 0 || metrics.expiredNotRenewed > 0) && (
@@ -182,6 +161,8 @@ export function ManufacturerDashboard() {
             No devices are expiring soon or require renewal.
           </p>
         </div>
+      )}
+        </>
       )}
     </div>
   );

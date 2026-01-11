@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { superAdminApi } from '@/api/superAdmin';
 
 interface AddManufacturerFormData {
   firstName: string;
@@ -22,10 +24,12 @@ interface AddManufacturerFormData {
   district: string;
   state: string;
   country: string;
+  password: string;
 }
 
 export function AddManufacturer() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<AddManufacturerFormData>({
     firstName: '',
@@ -40,7 +44,8 @@ export function AddManufacturer() {
     pinCode: '',
     district: '',
     state: '',
-    country: 'India'
+    country: 'India',
+    password: ''
   });
 
   const [errors, setErrors] = useState<Partial<AddManufacturerFormData>>({});
@@ -80,6 +85,7 @@ export function AddManufacturer() {
     if (!formData.district.trim()) newErrors.district = 'District is required';
     if (!formData.state.trim()) newErrors.state = 'State is required';
     if (!formData.country.trim()) newErrors.country = 'Country is required';
+    if (!formData.password.trim()) newErrors.password = 'Password is required';
 
     // Email validation
     if (formData.businessEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.businessEmail)) {
@@ -120,15 +126,41 @@ export function AddManufacturer() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log('Manufacturer data to be submitted:', formData);
+      // Map form data to API request format
+      const manufacturerData = {
+        name: formData.entityName,
+        gst: formData.gstNo,
+        pan: formData.panNo,
+        fullname_user: `${formData.firstName} ${formData.lastName}`,
+        email: formData.businessEmail,
+        password: formData.password,
+        phone: formData.businessMobile,
+        address: formData.address,
+        pincode: formData.pinCode,
+        district: formData.district,
+        city: formData.area,
+        state: formData.state,
+      };
+
+      // Call API to create manufacturer
+      const response = await superAdminApi.createManufacturer(manufacturerData);
+
+      toast({
+        title: 'Success',
+        description: response.message || 'Manufacturer created successfully',
+      });
       
       // Navigate back to manufacturers list
       navigate('/super-admin/manufacturers');
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create manufacturer';
       console.error('Error submitting manufacturer:', error);
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -148,7 +180,8 @@ export function AddManufacturer() {
       pinCode: '',
       district: '',
       state: '',
-      country: 'India'
+      country: 'India',
+      password: ''
     });
     setErrors({});
   };
@@ -271,6 +304,21 @@ export function AddManufacturer() {
                 </div>
                 {errors.businessMobile && <p className="text-sm text-red-500">{errors.businessMobile}</p>}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">
+                Password <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                placeholder="Enter password"
+                className={errors.password ? 'border-red-500' : ''}
+              />
+              {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
           </CardContent>
         </Card>

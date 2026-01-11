@@ -118,6 +118,17 @@ interface LoginResponse {
   };
 }
 
+interface DashboardResponse {
+  status: string;
+  data: {
+    activeInventory: number;
+    inventoryCount: number;
+    activationsInLastWeek: number;
+    inventoryExpiring: number;
+    inventoryExpired: number;
+  };
+}
+
 interface RegisterRequest {
   name: string;
   gst: string;
@@ -193,6 +204,31 @@ export const manufacturerApi = {
 
   logout: () => {
     tokenManager.removeToken('MANUFACTURER');
+  },
+
+  // Dashboard
+  getDashboard: async (): Promise<DashboardResponse> => {
+    const token = tokenManager.getToken('MANUFACTURER');
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+
+    console.log('📊 Fetching manufacturer dashboard...');
+    const response = await fetch(`${API_BASE_URL}/manufacturer/dashboard/main`, {
+      method: 'GET',
+      headers: {
+        'Authorization': token,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Failed to fetch dashboard' }));
+      throw new Error(error.message || `HTTP Error: ${response.status}`);
+    }
+
+    const data: DashboardResponse = await response.json();
+    console.log('✅ Dashboard fetched:', data.data);
+    return data;
   },
 
   // Inventory Management

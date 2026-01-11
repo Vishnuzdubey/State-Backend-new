@@ -153,13 +153,13 @@ export function Manufacturers() {
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button
+          {/* <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => navigate('/super-admin/manufacturers/add')}
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Manufacturer
-          </Button>
+          </Button> */}
         </div>
       </div>
 

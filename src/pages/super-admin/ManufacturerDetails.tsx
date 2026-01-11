@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { superAdminApi, type ManufacturerData } from '@/api';
-import { manufacturerApi } from '@/api/manufacturer';
+// import { manufacturerApi } from '@/api/manufacturer';
 
 export function ManufacturerDetails() {
   const { id } = useParams();
@@ -42,6 +42,7 @@ export function ManufacturerDetails() {
   const [showAssignDistributor, setShowAssignDistributor] = useState(false);
   const [devices, setDevices] = useState<any[]>([]);
   const [loadingDevices, setLoadingDevices] = useState(false);
+  const [userDetails] = useState<any[]>([]);
 
   useEffect(() => {
     fetchManufacturerDetails();
@@ -134,20 +135,11 @@ export function ManufacturerDetails() {
       setLoadingDevices(true);
       console.log('🔄 Fetching manufacturer devices with ID:', id);
 
-      // Try with manufacturerApi first (uses MANUFACTURER token), fallback to superAdminApi
-      let response;
-      try {
-        response = await manufacturerApi.getInventoryByQuery({
-          page: 1,
-          limit: 100
-        });
-      } catch (err: any) {
-        console.log('⚠️ ManufacturerAPI failed, trying SuperAdminAPI:', err.message);
-        response = await superAdminApi.getInventoryByQuery({
-          page: 1,
-          limit: 100
-        });
-      }
+      const response = await superAdminApi.getInventoryByQuery({
+        page: 1,
+        limit: 10000000,
+        manufacturerId: id
+      });
 
       console.log('✅ Response received:', response);
       setDevices(response.data || []);
@@ -252,33 +244,7 @@ export function ManufacturerDetails() {
     );
   }
 
-  const userDetails = [
-    {
-      id: '1',
-      fullName: 'Vishal Pandey',
-      userName: 'vltd_watsoo',
-      designation: 'Admin',
-      emailId: 'vltd@watsoo.com',
-      contactNo: '8448835133'
-    },
-    {
-      id: '2',
-      fullName: 'Rajesh Kumar',
-      userName: 'rajesh_watsoo',
-      designation: 'Manager',
-      emailId: 'rajesh@watsoo.com',
-      contactNo: '9876543210'
-    },
-    {
-      id: '3',
-      fullName: 'Priya Sharma',
-      userName: 'priya_watsoo',
-      designation: 'Operator',
-      emailId: 'priya@watsoo.com',
-      contactNo: '8765432109'
-    }
-  ];
-
+  
   const documents = [
     { name: 'GST Document', url: manufacturer.gst_doc, status: manufacturer.gst_doc ? 'Uploaded' : 'Pending' },
     { name: 'Balance Sheet', url: manufacturer.balance_sheet_doc, status: manufacturer.balance_sheet_doc ? 'Uploaded' : 'Pending' },

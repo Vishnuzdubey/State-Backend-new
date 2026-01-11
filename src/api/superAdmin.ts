@@ -47,6 +47,27 @@ export interface GetManufacturersResponse {
   data: ManufacturerData[];
 }
 
+export interface CreateManufacturerRequest {
+  name: string;
+  gst: string;
+  pan: string;
+  fullname_user: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
+  pincode: string;
+  district: string;
+  city: string;
+  state: string;
+}
+
+export interface CreateManufacturerResponse {
+  status: string;
+  message: string;
+  data?: ManufacturerData;
+}
+
 export interface UpdateManufacturerStatusRequest {
   status: 'PENDING' | 'ACKNOWLEDGED' | 'APPROVED';
   password: string;
@@ -453,6 +474,31 @@ export const superAdminApi = {
   },
 
   // Manufacturer Management
+  createManufacturer: async (manufacturerData: CreateManufacturerRequest): Promise<CreateManufacturerResponse> => {
+    const token = tokenManager.getToken('SUPER_ADMIN');
+    if (!token) throw new Error('Not authenticated');
+
+    console.log('➕ Creating new manufacturer...');
+    const response = await fetch(`${API_BASE_URL}/admin/manufacturer`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(manufacturerData),
+      mode: 'cors',
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status === 'success') {
+      console.log('✅ Manufacturer created successfully');
+      return data;
+    }
+
+    throw new Error(data.message || 'Failed to create manufacturer');
+  },
+
   getManufacturers: async (params?: {
     page?: number;
     limit?: number;

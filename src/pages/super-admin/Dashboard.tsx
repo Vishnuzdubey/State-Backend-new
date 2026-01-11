@@ -1,148 +1,102 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import {
   Activity,
   Package,
   TrendingUp,
   Clock,
-  XCircle,
-  CheckCircle
+  AlertCircle
 } from 'lucide-react';
 import { StatsCard } from '@/components/common/StatsCard';
 import { MapComponent } from '@/components/common/MapComponent';
-import { DataTable, StatusBadge } from '@/components/common/DataTable';
-import { superAdminApi, type ManufacturerData } from '@/api';
+import { API_BASE_URL, tokenManager } from '@/api';
 
 export function SuperAdminDashboard() {
-  const navigate = useNavigate();
-  const [manufacturers, setManufacturers] = useState<ManufacturerData[]>([]);
+  // const navigate = useNavigate();
   const [, setIsLoading] = useState(true);
-
-  // Mock data
-  const metrics = {
-    activeDevices: 15420,
-    inventoryUploaded: 8920,
-    activations: 1240,
-    devicesExpiring: 89,
-    expiredDevices: 23,
-    pendingApprovals: 0
-  };
+  const [metrics, setMetrics] = useState({
+    activeInventory: 0,
+    inventoryCount: 0,
+    activationsInLastWeek: 0,
+    inventoryExpiring: 0,
+    inventoryExpired: 0
+  });
 
   useEffect(() => {
-    fetchManufacturers();
+    fetchDashboardMetrics();
   }, []);
 
-  const fetchManufacturers = async () => {
+  const fetchDashboardMetrics = async () => {
     try {
-      const response = await superAdminApi.getManufacturers();
-      setManufacturers(response.data);
-      console.log('📊 Dashboard loaded with', response.data.length, 'manufacturers');
+      const token = tokenManager.getToken('SUPER_ADMIN');
+      if (!token) {
+        console.error('No authentication token found');
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/admin/dashboard/main`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+      });
+
+      const result = await response.json();
+      if (result.status === 'success') {
+        setMetrics(result.data);
+      }
     } catch (error) {
-      console.error('Failed to fetch manufacturers:', error);
+      console.error('Failed to fetch dashboard metrics:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const pendingManufacturers = manufacturers.filter(m => m.status === 'PENDING');
-  const pendingApprovals = pendingManufacturers.map(m => ({
-    id: m.id,
-    entityName: m.name,
-    type: 'Manufacturer',
-    district: m.district,
-    status: m.status.toLowerCase(),
-    email: m.email,
-    phone: m.phone,
-  }));
-
-  metrics.pendingApprovals = pendingApprovals.length;
-
-  const approvalColumns = [
-    { key: 'entityName', header: 'Entity Name' },
-    { key: 'type', header: 'Type' },
-    { key: 'district', header: 'District' },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (value: string) => <StatusBadge status={value} />
-    }
-  ];
-
-  const approvalActions = [
-    {
-      label: 'View Details',
-      onClick: (row: any) => navigate(`/super-admin/manufacturers/${row.id}`)
-    },
-    {
-      label: 'Open Manufacturers',
-      onClick: () => navigate('/super-admin/manufacturers')
-    }
-  ];
-
   return (
     <div className="space-y-8 w-full">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Super Admin Dashboard</h1>
-        <p className="text-gray-600 text-lg">Overview of your RoadEye device management system</p>
+        <p className="text-gray-600 text-lg">Overview of your Venus device management system</p>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatsCard
-          title="Active Devices"
-          value={metrics.activeDevices.toLocaleString()}
+          title="Active Inventory"
+          value={metrics.activeInventory.toLocaleString()}
           icon={Activity}
-          trend={{ value: 12, isPositive: true }}
         />
         <StatsCard
-          title="Inventory Uploaded"
-          value={metrics.inventoryUploaded.toLocaleString()}
+          title="Total Inventory"
+          value={metrics.inventoryCount.toLocaleString()}
           icon={Package}
-          trend={{ value: 8, isPositive: true }}
         />
         <StatsCard
           title="Activations (7 days)"
-          value={metrics.activations.toLocaleString()}
+          value={metrics.activationsInLastWeek.toLocaleString()}
           icon={TrendingUp}
-          trend={{ value: 23, isPositive: true }}
         />
         <StatsCard
-          title="Devices Expiring (30 days)"
-          value={metrics.devicesExpiring}
+          title="Expiring (30 days)"
+          value={metrics.inventoryExpiring}
           icon={Clock}
-          trend={{ value: 5, isPositive: false }}
+          className="border-orange-200"
         />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Expired Devices"
-          value={metrics.expiredDevices}
-          icon={XCircle}
+          title="Expired Inventory"
+          value={metrics.inventoryExpired}
+          icon={AlertCircle}
           className="border-red-200"
         />
-        <StatsCard
-          title="Pending Approvals"
-          value={metrics.pendingApprovals}
-          icon={CheckCircle}
-          className="border-yellow-200"
-        />
       </div>
 
-      {/* Map and Approvals */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      {/* Map */}
+      <div>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Device Locations</h2>
         <MapComponent />
-
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Pending Approvals</h2>
-          <DataTable
-            data={pendingApprovals}
-            columns={approvalColumns}
-            actions={approvalActions}
-            searchable={false}
-            pagination={false}
-          />
-        </div>
       </div>
     </div>
   );
