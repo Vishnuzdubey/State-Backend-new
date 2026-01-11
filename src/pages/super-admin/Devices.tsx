@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Plus, Map } from 'lucide-react';
+import { MapIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/DataTable';
 import { Badge } from '@/components/ui/badge';
@@ -214,7 +215,7 @@ export function Devices() {
             variant="outline"
             onClick={() => navigate('/super-admin/devices/map')}
           >
-            <Map className="mr-2 h-4 w-4" />
+            <MapIcon className="mr-2 h-4 w-4" />
             Live Map
           </Button>
           {/* <Button
