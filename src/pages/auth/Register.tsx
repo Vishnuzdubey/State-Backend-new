@@ -143,7 +143,7 @@ export function Register() {
                 <Cpu className="h-8 w-8 text-white" />
               </div>
               <h2 className="text-4xl font-bold text-gray-900 mb-3">
-                Join RoadEye's
+                Join Vahan Saarthi's
                 <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   Manufacturing Network
                 </span>
@@ -163,7 +163,7 @@ export function Register() {
               <div className="absolute inset-0 bg-gradient-to-t from-blue-900/80 to-transparent flex items-end">
                 <div className="p-6 text-white">
                   <h3 className="text-xl font-bold mb-2">Get Started Today</h3>
-                  <p className="text-sm text-blue-100">Join 500+ manufacturers already using RoadEye</p>
+                  <p className="text-sm text-blue-100">Join 500+ manufacturers already using Vahan Saarthi</p>
                 </div>
               </div>
             </div>
@@ -197,7 +197,7 @@ export function Register() {
                 Manufacturer Registration
               </h2>
               <p className="mt-2 text-sm text-gray-600">
-                Register your company to get started with RoadEye
+                Register your company to get started with Vahan Saarthi
               </p>
             </div>
 

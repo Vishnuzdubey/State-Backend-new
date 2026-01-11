@@ -80,7 +80,7 @@ export function Login() {
                 <Cpu className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">RoadEye</h1>
+                <h1 className="text-2xl font-bold text-white">Vahan Saarthi</h1>
                 <p className="text-sm text-blue-100">Vehicle Tracking Platform</p>
               </div>
             </div>
@@ -143,7 +143,7 @@ export function Login() {
                 <Cpu className="h-8 w-8 text-white" />
               </div>
               <h2 className="mt-6 text-3xl font-bold text-gray-900">
-                RoadEye Login
+                Vahan Saarthi Login
               </h2>
               <p className="mt-2 text-sm text-gray-600">
                 Sign in to your admin account

@@ -6,6 +6,7 @@ import {
   Wifi
 } from 'lucide-react';
 import { StatsCard } from '@/components/common/StatsCard';
+import { MapComponent } from '@/components/common/MapComponent';
 import { rfcApi } from '@/api/rfc';
 
 export function RFCDashboard() {
@@ -89,6 +90,9 @@ export function RFCDashboard() {
           icon={Truck}
         />
       </div>
+
+      {/* Device Location Map */}
+      <MapComponent height="500px" />
     </div>
   );
 }
