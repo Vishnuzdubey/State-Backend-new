@@ -48,11 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('🔍 Trying Super Admin login...');
       const response = await superAdminApi.login({ email, password });
 
-      if (response.status === 'success' && response.user) {
+      if ((response.status === 'success' || Boolean(response.token)) && response.user) {
         const user: User = {
           id: response.user.id,
           email: response.user.email,
-          name: response.user.fullname,
+          name: response.user.fullname || response.user.name || 'Super Admin',
           role: 'super-admin',
           avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=SuperAdmin'
         };

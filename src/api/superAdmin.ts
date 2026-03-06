@@ -7,14 +7,15 @@ export interface SuperAdminLoginRequest {
 }
 
 export interface SuperAdminLoginResponse {
-  status: string;
-  message: string;
-  token: string;
+  status?: string;
+  message?: string;
+  token?: string;
   user: {
     id: string;
-    fullname: string;
+    fullname?: string;
+    name?: string;
     email: string;
-    password: string;
+    password?: string;
   };
 }
 
@@ -459,11 +460,22 @@ export const superAdminApi = {
     });
 
     const data = await response.json();
+    const token = data?.token ?? data?.data?.token;
+    const user = data?.user ?? data?.data?.user ?? data?.admin;
+    const isSuccess = data?.status === 'success' || Boolean(token && user);
 
-    if (response.ok && data.status === 'success') {
+    if (response.ok && isSuccess) {
       console.log('✅ Super Admin login successful');
-      tokenManager.setToken('SUPER_ADMIN', data.token);
-      return data;
+      if (token) {
+        tokenManager.setToken('SUPER_ADMIN', token);
+      }
+
+      return {
+        ...data,
+        status: data?.status ?? 'success',
+        user,
+        token,
+      };
     }
 
     throw new Error(data.message || 'Super admin login failed');
