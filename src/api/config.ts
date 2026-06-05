@@ -1,5 +1,5 @@
 // API Base URL Configuration
-export const API_BASE_URL = 'https://be.tracker.theroadeye.com/api/v1';
+export const API_BASE_URL = 'https://roadeyetracker.vercel.app/api/v1';
 
 // Token Storage Keys
 export const TOKEN_KEYS = {
